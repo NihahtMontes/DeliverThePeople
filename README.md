@@ -4,16 +4,62 @@ Sistema Integral de Gestión de Restaurante: Cocina, Delivery y Recursos Humanos
 
 ---
 
-## ¿Qué es este proyecto?
+## Índice
 
-Una plataforma web que fusiona dos módulos de software desarrollados por dos equipos distintos para crear un sistema unificado de gestión de restaurante. Centraliza la operación de cocina y delivery con la administración de personal, turnos y tareas.
-
-**Valor principal:** los cocineros, despachadores y demás personal que operan en cocina son los mismos empleados creados y gestionados por Recursos Humanos. Un solo sistema, una sola fuente de verdad.
+| # | Sección | Descripción |
+|---|---------|-------------|
+| 1 | [¿Qué es este proyecto?](#1-qué-es-este-proyecto) | Idea central y valor principal |
+| 2 | [Orden de Construcción](#2-orden-de-construcción) | Secuencia obligatoria de ejecución |
+| 3 | [Los Dos Equipos](#3-los-dos-equipos) | Integrantes y responsabilidades |
+| 4 | [Stack Tecnológico](#4-stack-tecnológico) | Tecnologías por capa |
+| 5 | [Modelo de Datos Definitivo](#5-modelo-de-datos-definitivo) | 16 tablas del sistema |
+| 5.0 | └ [Diagrama de Navegación de Tablas](#50-diagrama-de-navegación-de-tablas) | Mapa rápido de relaciones |
+| 5.1 | └ [Núcleo Compartido](#51-núcleo-compartido) | sucursales, empleados |
+| 5.2 | └ [Módulo A: Cocina y Delivery](#52-módulo-a-cocina-y-delivery) | inventario, solicitudes, pedidos, historial, mensajes, equipos, mantenimientos, pagos, items, ingredientes |
+| 5.3 | └ [Módulo B: Personal](#53-módulo-b-personal) | horarios_asistencias, areas, tareas |
+| 5.4 | └ [Tabla Unificada de Incidencias](#54-tabla-unificada-de-incidencias) | incidencias (cocina + personal) |
+| 5.5 | └ [Datos Estáticos](#55-datos-estáticos) | pedidos, items_pedido, ingredientes_item, pagos |
+| 6 | [Máquina de Estados de Pedidos](#6-máquina-de-estados-de-pedidos) | Las 7 transiciones con actor y CU |
+| 7 | [Puntos de Sinergia](#7-puntos-de-sinergia) | 13 FKs que cruzan módulos |
+| 8 | [Casos de Uso](#8-casos-de-uso) | Todos los CUs con tablas involucradas |
+| 9 | [Navegación de la Aplicación](#9-navegación-de-la-aplicación) | Sidebar, rutas y agrupaciones |
+| 10 | [Roles del Sistema](#10-roles-del-sistema) | Permisos por rol |
+| 11 | [Estructura del Proyecto](#11-estructura-del-proyecto) | Árbol de carpetas y archivos |
+| 12 | [Configuración Inicial](#12-configuración-inicial) | Requisitos, .env, instalación y ejecución |
+| 13 | [Plan de Desarrollo](#13-plan-de-desarrollo) | Cronograma día por día |
+| 14 | [Guías del Equipo](#14-guías-del-equipo) | Documentos para Danilo y Sandro |
+| 15 | [Licencia y Equipos](#15-licencia-y-equipos) | |
 
 ---
 <img width="697" height="306" alt="image" src="https://github.com/user-attachments/assets/739ce12b-c7a4-46dd-b9c3-27951cabee10" />
 
-## Los Dos Equipos
+## 1. ¿Qué es este proyecto?
+
+Una plataforma web que fusiona dos módulos de software en un solo sistema de gestión de restaurante. Centraliza la operación de cocina y delivery con la administración de personal, turnos y tareas.
+
+**Valor principal:** los cocineros, despachadores, técnicos y demás personal que operan en cocina son los mismos empleados creados y gestionados por Recursos Humanos. Un solo sistema, una sola fuente de verdad.
+
+---
+
+## 2. Orden de Construcción
+
+La construcción del proyecto sigue un orden obligatorio para evitar bloqueos:
+
+| Paso | Responsable | Entregable | Depende de |
+|------|-------------|------------|------------|
+| **1. Base de Datos** | **Danilo** | Crear proyecto en Supabase, ejecutar DDL, ejecutar seeds, compartir credenciales con los 6 | Nadie |
+| **2. Backend** | **Nihaht** | Servidor Express con modelos, controllers y rutas para todas las tablas | Paso 1 |
+| **3. Frontend Base** | **Sandro** | Layout (Navbar + Sidebar + Router), sistema de login, Dashboard, placeholders para todas las rutas | Paso 2 |
+| **4. CUs de Cocina** | **Nihaht** | CU43, CU44, CU45 (Órdenes, Cola de Producción, Incidencias) | Paso 3 |
+| **5. CUs de Operaciones** | **Sandro** | CU5, CU6, CU7, CU8 (Inventario, Solicitudes, Registrar Pedido, Dashboard) | Paso 3 |
+| **6. CUs de Delivery** | **Danilo** | CU9, CU10, CU11, CU12 (Despacho, Chat, Pagos, Cancelación) | Paso 3 |
+| **7. CUs de Personal** | **Rocket** | CU1-CU12 del Módulo B (Empleados, Turnos, Tareas, Áreas, Incidencias) | Paso 3 |
+
+**Regla:** Nadie avanza sin que el paso anterior esté completado y verificado.
+
+---
+
+## 3. Los Dos Equipos
 
 ### Equipo A: "Los Herederos de Epstein"
 
@@ -22,8 +68,8 @@ Responsables del **Módulo A: Control de Actividades de Cocina y Delivery**.
 | Integrante | Responsabilidad |
 |------------|----------------|
 | **Nihaht** | Despacho de pedidos, visualización de cola de producción, reporte de incidencias en cocina |
-| **Sandro** | Abastecimiento de insumos, gestión de personal de cocina, registro de pedidos, supervisión de progreso |
-| **Danilo** | Coordinación de despacho con delivery, comunicación con cliente, registro de pagos, cancelación de pedidos |
+| **Sandro** | Frontend base, abastecimiento de insumos, gestión de personal de cocina, registro de pedidos, supervisión de progreso |
+| **Danilo** | Configuración de Supabase, coordinación de despacho con delivery, comunicación con cliente, registro de pagos, cancelación de pedidos |
 
 ### Equipo B: "Rocket"
 
@@ -37,7 +83,7 @@ Responsables del **Módulo B: Administración de Personal**.
 
 ---
 
-## Stack Tecnológico
+## 4. Stack Tecnológico
 
 | Capa | Tecnología | Propósito |
 |------|-----------|-----------|
@@ -52,204 +98,165 @@ Responsables del **Módulo B: Administración de Personal**.
 
 ---
 
-## Lo que NO desarrollamos (Datos Estáticos)
+## 5. Modelo de Datos Definitivo
 
-Estas tablas existen en la base de datos pero se llenan mediante scripts de inserción manual. No se programan CRUDs para ellas. Simulan los módulos externos del restaurante (app del cliente, facturación, pasarela de pagos).
+**16 tablas.** Versión híbrida que fusiona los mejores aspectos de los dos diseños originales. Todas las columnas y relaciones están en español.
 
-| Tabla | Contenido | Ejemplo |
-|-------|-----------|---------|
-| `pedidos` | Órdenes que entran al restaurante | Pedido #1042 de María Gómez: 2 pizzas |
-| `items_pedido` | Platos dentro de cada pedido | Pizza Margherita x2 |
-| `ingredientes_item` | Ingredientes de cada plato (para filtros) | Harina, tomate, mozzarella, albahaca |
-| `pagos` | Pagos recibidos | $25.000 - Transferencia |
+**Fusiones aplicadas:**
+- `turnos` + `asistencias` → `horarios_asistencias`
+- `incidentes_cocina` + `incidentes_personal` → `incidencias` (tipificada por ENUM)
+- `evidencias_tarea` absorbida en `tareas.url_foto_evidencia`
 
 ---
 
-## Modelos de la Base de Datos (PostgreSQL en Supabase)
+### 5.0 Diagrama de Navegación de Tablas
 
-Todas las tablas, columnas y relaciones están en español.
+```
+sucursales ──┬── empleados ──┬── horarios_asistencias
+             │               ├── tareas ─── areas
+             │               ├── incidencias (reportado_por, afectado)
+             │               ├── pedidos (cocinero, despachador)
+             │               ├── historial_pedido (cambiado_por)
+             │               ├── mensajes_cliente (enviado_por)
+             │               ├── solicitudes_abastecimiento (solicitado_por)
+             │               ├── mantenimientos (tecnico_id)
+             │               └── pagos (registrado_por)
+             │
+             ├── inventario ─── solicitudes_abastecimiento
+             ├── equipos ─── mantenimientos
+             ├── equipos ─── incidencias (equipo_id)
+             ├── equipos ─── tareas (equipo_relacionado_id)
+             ├── areas
+             ├── pedidos ─── items_pedido ─── ingredientes_item
+             ├── pedidos ─── historial_pedido
+             ├── pedidos ─── mensajes_cliente
+             └── pedidos ─── pagos
+```
 
 ---
 
-### Modelos Compartidos
+### 5.1 Núcleo Compartido
 
 #### `sucursales` — Locales del restaurante
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `nombre` | TEXT | Nombre del local |
+| `id` | UUID PK | Clave primaria |
+| `nombre` | TEXT | Nombre del local, NOT NULL |
 | `direccion` | TEXT | Dirección física |
 | `telefono` | TEXT | Teléfono de contacto |
-| `activa` | BOOLEAN | Si está operativa |
+| `activa` | BOOLEAN | DEFAULT true |
+| `created_at` | TIMESTAMPTZ | DEFAULT NOW() |
+
+#### `empleados` — Toda la gente del restaurante (tabla central del sistema)
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | UUID PK | Clave primaria |
+| `auth_id` | UUID | Supabase Auth UID (reemplaza bcrypt manual) |
+| `email` | TEXT | Correo para login, UNIQUE, NOT NULL |
+| `nombre` | TEXT | Nombre, NOT NULL |
+| `apellido` | TEXT | Apellido, NOT NULL |
+| `rol` | ENUM | `admin`, `gerente`, `cocinero`, `despachador`, `cajero`, `aseo`, `mantenimiento` |
+| `sucursal_id` | UUID → sucursales | Sucursal asignada |
+| `telefono` | TEXT | Teléfono de contacto |
+| `estado` | ENUM | `activo`, `inactivo`, `suspendido` |
+| `created_at` | TIMESTAMPTZ | DEFAULT NOW() |
+| `updated_at` | TIMESTAMPTZ | DEFAULT NOW() |
 
 ---
 
-### Modelos del Módulo A — Cocina y Delivery (Equipo Herederos de Epstein)
+### 5.2 Módulo A: Cocina y Delivery
 
 #### `inventario` — Ingredientes en la despensa
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `nombre` | TEXT | Nombre del ingrediente |
+| `id` | UUID PK | Clave primaria |
+| `sucursal_id` | UUID → sucursales | Sucursal |
+| `nombre` | TEXT | Nombre del ingrediente, NOT NULL |
 | `categoria` | ENUM | `lacteo`, `carnico`, `verdura`, `seco`, `bebida`, `limpieza` |
 | `cantidad_actual` | NUMERIC(10,2) | Stock actual |
-| `unidad` | TEXT | `kg`, `litros`, `unidades`, `g` |
+| `unidad` | TEXT | kg, litros, unidades, g |
 | `stock_minimo` | NUMERIC(10,2) | Umbral de alerta |
 | `costo_unitario` | NUMERIC(10,2) | Precio por unidad |
 | `proveedor` | TEXT | Nombre del proveedor |
-| `sucursal_id` | UUID → sucursales | Sucursal a la que pertenece |
-| `ultima_actualizacion` | TIMESTAMPTZ | Último cambio |
+| `created_at` | TIMESTAMPTZ | DEFAULT NOW() |
+| `updated_at` | TIMESTAMPTZ | DEFAULT NOW() |
 
 #### `solicitudes_abastecimiento` — Pedidos de más/menos stock
 
-> **CU5 (Sandro):** El Administrador de Cocina no solo revisa el inventario. Crea una solicitud de aumento o disminución y el sistema actualiza el stock automáticamente al procesarla.
-
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
+| `id` | UUID PK | Clave primaria |
 | `inventario_id` | UUID → inventario | Ingrediente afectado |
-| `tipo` | ENUM | `aumento` o `disminucion` |
+| `tipo` | ENUM | `aumento`, `disminucion` |
 | `cantidad_solicitada` | NUMERIC(10,2) | Cuánto se pide |
 | `motivo` | TEXT | Razón del ajuste |
-| `estado` | ENUM | `pendiente` → `procesada` → `rechazada` |
-| `solicitado_por` | UUID → empleados | **Sinergia:** Admin de Cocina que solicita |
-| `fecha_solicitud` | TIMESTAMPTZ | Cuándo se creó |
-| `fecha_procesamiento` | TIMESTAMPTZ | Cuándo se aplicó |
-
-#### `historial_pedido` — Trazabilidad de cada pedido
-
-> **CU43 (Nihaht), CU44 (Nihaht), CU8 (Sandro):** Cada vez que un cocinero o despachador cambia el estado de un pedido, queda registrado aquí.
-
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `pedido_id` | UUID → pedidos | Pedido afectado |
-| `estado_anterior` | ENUM | `pendiente`, `en_preparacion`, `terminado`, `en_delivery`, `entregado`, `cancelado` |
-| `estado_nuevo` | ENUM | El nuevo estado |
-| `cambiado_por` | UUID → empleados | **Sinergia:** Cocinero o despachador que hizo el cambio |
-| `fecha_cambio` | TIMESTAMPTZ | Cuándo ocurrió |
-
-#### `mensajes_cliente` — Chat con el cliente
-
-> **CU10 (Danilo):** El despachador se comunica con el cliente.
-
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `pedido_id` | UUID → pedidos | Pedido relacionado |
-| `mensaje` | TEXT | Contenido del mensaje |
-| `direccion` | ENUM | `hacia_cliente` o `desde_cliente` |
-| `enviado_por` | UUID → empleados | **Sinergia:** Despachador que escribe |
-| `fecha` | TIMESTAMPTZ | Cuándo se envió |
+| `estado` | ENUM | `pendiente`, `aprobada`, `rechazada` |
+| `solicitado_por` | UUID → empleados | **Sinergia** |
+| `procesado_por` | UUID → empleados | Quién aprobó/rechazó |
+| `fecha_solicitud` | TIMESTAMPTZ | DEFAULT NOW() |
+| `fecha_procesamiento` | TIMESTAMPTZ | Se llena al aprobar/rechazar |
 
 #### `equipos` — Equipos de cocina
 
-> **CU45 (Nihaht) y mantenimiento general:** Activos físicos del restaurante.
-
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `nombre` | TEXT | Nombre del equipo |
-| `tipo` | ENUM | `horno`, `refrigerador`, `estufa`, `lavavajillas`, `batidora`, `otro` |
-| `numero_serie` | TEXT | Número de serie |
-| `estado` | ENUM | `operativo` → `requiere_mantenimiento` → `fuera_de_servicio` |
+| `id` | UUID PK | Clave primaria |
 | `sucursal_id` | UUID → sucursales | Sucursal |
+| `nombre` | TEXT | Nombre del equipo, NOT NULL |
+| `tipo` | ENUM | `horno`, `refrigerador`, `congelador`, `estufa`, `freidora`, `lavavajillas`, `batidora`, `otro` |
+| `numero_serie` | TEXT | Número de serie |
+| `estado` | ENUM | `operativo`, `requiere_mantenimiento`, `fuera_de_servicio` |
 | `fecha_compra` | DATE | Fecha de adquisición |
+| `created_at` | TIMESTAMPTZ | DEFAULT NOW() |
 
 #### `mantenimientos` — Historial de reparaciones
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
+| `id` | UUID PK | Clave primaria |
 | `equipo_id` | UUID → equipos | Equipo reparado |
 | `descripcion` | TEXT | Qué se hizo |
-| `tecnico_id` | UUID → empleados | **Sinergia:** Técnico que realizó la reparación |
+| `tecnico_id` | UUID → empleados | **Sinergia** |
 | `costo` | NUMERIC(10,2) | Costo de la reparación |
-| `fecha` | TIMESTAMPTZ | Cuándo se hizo |
-
-#### `incidentes_cocina` — Problemas en cocina
-
-> **CU45 (Nihaht):** El cocinero reporta fallas de equipo, falta de insumos u otros problemas. **Diferente** a los incidentes de personal del Módulo B.
-
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `tipo` | ENUM | `falla_equipo`, `falta_insumo`, `otro` |
-| `titulo` | TEXT | Título del incidente |
-| `descripcion` | TEXT | Descripción detallada |
-| `severidad` | ENUM | `baja`, `media`, `alta`, `critica` |
-| `estado` | ENUM | `reportado`, `en_revision`, `en_progreso`, `resuelto`, `descartado` |
-| `reportado_por` | UUID → empleados | **Sinergia:** Cocinero que reporta |
-| `equipo_id` | UUID → equipos | **Sinergia:** Equipo afectado (si aplica) |
-| `fecha_reporte` | TIMESTAMPTZ | Cuándo se reportó |
-| `notas_resolucion` | TEXT | Cómo se resolvió |
+| `fecha` | TIMESTAMPTZ | DEFAULT NOW() |
 
 ---
 
-### Modelos del Módulo B — Personal (Equipo Rocket)
+### 5.3 Módulo B: Personal
 
-#### `empleados` — Toda la gente del restaurante
-
-> **CU1, CU2, CU4, CU7 (Camila) y CU7 (Fernando):** Es el centro del sistema. Todo el que interactúa con la plataforma está aquí.
+#### `horarios_asistencias` — Fusión de turnos + asistencias
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `email` | TEXT | Correo para login (único) |
-| `contraseña` | TEXT | Hash bcrypt |
-| `nombre` | TEXT | Nombre |
-| `apellido` | TEXT | Apellido |
-| `rol` | ENUM | `admin`, `gerente`, `cocinero`, `cajero`, `despachador`, `aseo`, `mantenimiento` |
-| `sucursal_id` | UUID → sucursales | Sucursal asignada |
-| `telefono` | TEXT | Teléfono de contacto |
-| `estado` | ENUM | `activo`, `inactivo`, `suspendido` |
-| `fecha_creacion` | TIMESTAMPTZ | Fecha de alta |
-| `ultima_actualizacion` | TIMESTAMPTZ | Última modificación |
-
-#### `turnos` — Horarios de trabajo
-
-> **CU3, CU6 (Camila y Fernando):** Define cuándo trabaja cada empleado.
-
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| `id` | UUID | Clave primaria |
+| `id` | UUID PK | Clave primaria |
 | `empleado_id` | UUID → empleados | Empleado |
 | `sucursal_id` | UUID → sucursales | Sucursal |
-| `dia_semana` | INTEGER | 0=Domingo ... 6=Sábado |
-| `hora_inicio` | TIME | Hora de entrada |
-| `hora_fin` | TIME | Hora de salida |
-| `vigencia_desde` | DATE | Desde cuándo aplica |
-| `vigencia_hasta` | DATE | Hasta cuándo (vacío = indefinido) |
-| `activo` | BOOLEAN | Si está vigente |
-
-#### `asistencias` — Quién llegó y a qué hora
-
-> **CU5 (Fernando):** Verifica cumplimiento de horarios.
-
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `empleado_id` | UUID → empleados | Empleado |
-| `turno_id` | UUID → turnos | Turno programado |
-| `sucursal_id` | UUID → sucursales | Sucursal |
-| `fecha` | DATE | Día |
-| `hora_programada_inicio` | TIME | Hora de entrada programada |
-| `hora_programada_fin` | TIME | Hora de salida programada |
-| `hora_entrada` | TIMESTAMPTZ | Marcaje real de entrada |
-| `hora_salida` | TIMESTAMPTZ | Marcaje real de salida |
-| `estado` | ENUM | `presente`, `atrasado`, `ausente`, `justificado` |
-| `minutos_atraso` | INTEGER | Minutos de retraso (calculado) |
+| `fecha` | DATE | Día laboral |
+| `hora_inicio_programada` | TIME | Hora de entrada programada |
+| `hora_fin_programada` | TIME | Hora de salida programada |
+| `hora_entrada_real` | TIMESTAMPTZ | Marcaje real de entrada (nullable) |
+| `hora_salida_real` | TIMESTAMPTZ | Marcaje real de salida (nullable) |
+| `estado` | ENUM | `programado`, `presente`, `atrasado`, `ausente`, `justificado` |
+| `minutos_atraso` | INT | Calculado al marcar entrada |
 | `observaciones` | TEXT | Notas |
+
+#### `areas` — Zonas del local
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | UUID PK | Clave primaria |
+| `sucursal_id` | UUID → sucursales | Sucursal |
+| `nombre` | TEXT | Nombre del área |
 
 #### `tareas` — Trabajos asignados al personal
 
-> **CU8 (Fernando), CU9 (Santiago), CU11 (Santiago):** El gerente asigna tareas, el empleado las ve y las marca como cumplidas.
-
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
+| `id` | UUID PK | Clave primaria |
+| `sucursal_id` | UUID → sucursales | Sucursal |
 | `titulo` | TEXT | Título de la tarea |
 | `descripcion` | TEXT | Descripción detallada |
 | `tipo` | ENUM | `mantenimiento`, `limpieza`, `reparacion`, `inventario`, `otro` |
@@ -257,144 +264,192 @@ Todas las tablas, columnas y relaciones están en español.
 | `estado` | ENUM | `pendiente`, `en_progreso`, `completada`, `cancelada` |
 | `asignado_a` | UUID → empleados | Empleado responsable |
 | `asignado_por` | UUID → empleados | Gerente/Supervisor que la asignó |
-| `area` | TEXT | Zona de trabajo |
-| `equipo_relacionado_id` | UUID → equipos | **Sinergia:** Si la tarea es reparar un equipo |
+| `area_id` | UUID → areas | Zona de trabajo (FK, no texto libre) |
+| `equipo_relacionado_id` | UUID → equipos | **Sinergia**, nullable |
 | `fecha_limite` | TIMESTAMPTZ | Fecha máxima de cumplimiento |
-| `completada_en` | TIMESTAMPTZ | Cuándo se marcó como cumplida |
+| `completada_en` | TIMESTAMPTZ | Cuándo se marcó (nullable) |
+| `url_foto_evidencia` | TEXT | Evidencia de tarea cumplida (nullable) |
 | `notas` | TEXT | Observaciones |
-
-#### `evidencias_tarea` — Fotos de tarea cumplida
-
-> **CU11 (Santiago):** El empleado adjunta evidencia al reportar cumplimiento.
-
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `tarea_id` | UUID → tareas | Tarea |
-| `foto_url` | TEXT | URL de la imagen |
-| `descripcion` | TEXT | Descripción de la evidencia |
-| `subido_por` | UUID → empleados | Quién subió la foto |
-| `fecha` | TIMESTAMPTZ | Cuándo se subió |
-
-#### `areas` — Zonas del local
-
-> **CU10 (Santiago):** El empleado consulta qué zonas le tocan.
-
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `sucursal_id` | UUID → sucursales | Sucursal |
-| `nombre` | TEXT | Nombre del área (ej. "Cocina Zona Caliente") |
-
-#### `incidentes_personal` — Accidentes o problemas del empleado
-
-> **CU12 (Santiago):** El empleado reporta accidentes laborales. **Diferente** a `incidentes_cocina` (Módulo A), que es para fallas de equipo/insumos.
-
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `tipo` | ENUM | `accidente_laboral`, `enfermedad`, `conflicto`, `otro` |
-| `descripcion` | TEXT | Descripción de lo ocurrido |
-| `severidad` | ENUM | `leve`, `moderada`, `grave` |
-| `estado` | ENUM | `reportado`, `investigando`, `resuelto` |
-| `reportado_por` | UUID → empleados | Quién lo reportó |
-| `empleado_afectado_id` | UUID → empleados | Quién sufrió el incidente |
-| `fecha_incidente` | TIMESTAMPTZ | Cuándo ocurrió |
-| `lugar` | TEXT | Dónde ocurrió |
-| `testigos` | TEXT | Nombres de testigos |
-| `acciones_tomadas` | TEXT | Qué se hizo al respecto |
+| `created_at` | TIMESTAMPTZ | DEFAULT NOW() |
+| `updated_at` | TIMESTAMPTZ | DEFAULT NOW() |
 
 ---
 
-### Datos Estáticos (Solo Lectura, Inserción Manual)
+### 5.4 Tabla Unificada de Incidencias
+
+#### `incidencias` — Fusión de incidentes_cocina + incidentes_personal
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | UUID PK | Clave primaria |
+| `sucursal_id` | UUID → sucursales | Sucursal |
+| `tipo` | ENUM | `falta_insumo`, `falla_equipo`, `accidente_personal`, `conflicto`, `otro` |
+| `titulo` | TEXT | Título de la incidencia |
+| `descripcion` | TEXT | Descripción detallada |
+| `severidad` | ENUM | `baja`, `media`, `alta`, `critica` |
+| `estado` | ENUM | `reportado`, `en_revision`, `en_progreso`, `resuelto`, `descartado` |
+| `reportado_por` | UUID → empleados | **Sinergia** |
+| `empleado_afectado_id` | UUID → empleados | Nullable, solo accidente/conflicto |
+| `equipo_id` | UUID → equipos | Nullable, solo falla_equipo |
+| `lugar` | TEXT | Nullable, solo accidente/conflicto |
+| `testigos` | TEXT | Nullable |
+| `notas_resolucion` | TEXT | Nullable |
+| `fecha_reporte` | TIMESTAMPTZ | DEFAULT NOW() |
+| `fecha_resolucion` | TIMESTAMPTZ | Nullable |
+
+---
+
+### 5.5 Datos Estáticos
+
+Estas tablas existen en la base de datos pero se llenan mediante seeds. Simulan los módulos externos del restaurante (app del cliente, facturación, pasarela de pagos). Durante la operación, los campos `cocinero_asignado_id`, `despachador_asignado_id`, `estado` y `tiempo_real_entrega` se actualizan en runtime.
 
 #### `pedidos` — Órdenes que entran al restaurante
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `numero_pedido` | INTEGER | Número secuencial |
+| `id` | UUID PK | Clave primaria |
+| `numero_pedido` | INT | Número secuencial |
 | `sucursal_id` | UUID → sucursales | Sucursal |
 | `nombre_cliente` | TEXT | Nombre del cliente |
 | `telefono_cliente` | TEXT | Teléfono |
 | `direccion_cliente` | TEXT | Dirección de entrega |
-| `estado` | ENUM | `pendiente`, `en_preparacion`, `terminado`, `en_delivery`, `entregado`, `cancelado` |
-| `cocinero_asignado_id` | UUID → empleados | **Sinergia:** Cocinero que prepara |
-| `despachador_asignado_id` | UUID → empleados | **Sinergia:** Despachador que entrega |
+| `estado` | ENUM | `pendiente`, `en_preparacion`, `terminado`, `en_delivery`, `entregado`, `cancelado`, `retrasado` |
+| `cocinero_asignado_id` | UUID → empleados | **Sinergia**, se asigna en runtime |
+| `despachador_asignado_id` | UUID → empleados | **Sinergia**, se asigna en runtime |
 | `tiempo_estimado_entrega` | TIMESTAMPTZ | Hora estimada |
-| `tiempo_real_entrega` | TIMESTAMPTZ | Hora real |
+| `tiempo_real_entrega` | TIMESTAMPTZ | Hora real (nullable) |
 | `motivo_cancelacion` | TEXT | Si fue cancelado |
 | `notas` | TEXT | Notas adicionales |
-| `fecha_creacion` | TIMESTAMPTZ | Cuándo entró |
+| `fecha_creacion` | TIMESTAMPTZ | DEFAULT NOW() |
 
 #### `items_pedido` — Platos comprados
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `pedido_id` | UUID → pedidos | Pedido padre |
+| `id` | UUID PK | Clave primaria |
+| `pedido_id` | UUID → pedidos | ON DELETE CASCADE |
 | `nombre` | TEXT | Nombre del plato |
-| `cantidad` | INTEGER | Cuántas unidades |
+| `cantidad` | INT | Cuántas unidades |
 | `notas` | TEXT | Notas del cliente |
 
 #### `ingredientes_item` — Ingredientes de cada plato
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
-| `item_id` | UUID → items_pedido | Plato |
-| `nombre_ingrediente` | TEXT | Ingrediente |
+| `id` | UUID PK | Clave primaria |
+| `item_id` | UUID → items_pedido | ON DELETE CASCADE |
+| `nombre_ingrediente` | TEXT | Ej: "harina", "tomate" |
 
 #### `pagos` — Pagos recibidos
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Clave primaria |
+| `id` | UUID PK | Clave primaria |
 | `pedido_id` | UUID → pedidos | Pedido |
 | `monto` | NUMERIC(10,2) | Monto pagado |
-| `metodo` | TEXT | `transferencia`, `efectivo`, `tarjeta` |
-| `fecha_pago` | TIMESTAMPTZ | Cuándo se pagó |
+| `metodo` | TEXT | transferencia, efectivo, tarjeta |
+| `fecha_pago` | TIMESTAMPTZ | DEFAULT NOW() |
+| `registrado_por` | UUID → empleados | **Sinergia** |
+
+### Tablas de Soporte
+
+#### `historial_pedido` — Trazabilidad de cada pedido
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | UUID PK | Clave primaria |
+| `pedido_id` | UUID → pedidos | Pedido afectado |
+| `estado_anterior` | ENUM | Estado antes del cambio |
+| `estado_nuevo` | ENUM | Estado después del cambio |
+| `cambiado_por` | UUID → empleados | **Sinergia** |
+| `fecha_cambio` | TIMESTAMPTZ | DEFAULT NOW() |
+
+#### `mensajes_cliente` — Chat con el cliente
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | UUID PK | Clave primaria |
+| `pedido_id` | UUID → pedidos | Pedido relacionado |
+| `mensaje` | TEXT | Contenido del mensaje |
+| `direccion` | ENUM | `hacia_cliente`, `desde_cliente` |
+| `enviado_por` | UUID → empleados | **Sinergia** |
+| `fecha` | TIMESTAMPTZ | DEFAULT NOW() |
 
 ---
 
-## Puntos de Sinergia (FKs que cruzan los módulos)
+## 6. Máquina de Estados de Pedidos
+
+Un pedido no salta mágicamente a "terminado". Tiene un ciclo de vida con 7 transiciones, cada una ejecutada por un actor específico con su caso de uso.
+
+```
+                     ┌─── Danilo (CU12) ──→ CANCELADO ←── (desde cualquier estado)
+                     │
+APP CLIENTE ──→ PENDIENTE ──→ EN_PREPARACION ──→ TERMINADO ──→ EN_DELIVERY ──→ ENTREGADO
+ (insert seed) (Sandro CU7)  (Nihaht CU43a)    (Nihaht CU43b)  (Danilo CU9a)  (Danilo CU9b)
+                                       │
+                                       └──→ RETRASADO (sistema CU8)
+                                            cuando NOW() > tiempo_estimado_entrega
+                                            y el pedido no está entregado ni cancelado
+```
+
+| # | Transición | Actor | CU | Qué se registra |
+|---|-----------|-------|-----|-----------------|
+| 1 | → `pendiente` | Sandro (lee datos estáticos) | CU7 | `historial_pedido` + `cambiado_por` = Sandro |
+| 2 | `pendiente` → `en_preparacion` | Nihaht (bloquea el pedido) | **CU43a** | `historial_pedido` + `cocinero_asignado_id` = Nihaht |
+| 3 | `en_preparacion` → `terminado` | Nihaht (comida lista) | **CU43b** | `historial_pedido` + `cambiado_por` = Nihaht |
+| 4 | `terminado` → `en_delivery` | Danilo (asigna repartidor) | CU9a | `historial_pedido` + `despachador_asignado_id` |
+| 5 | `en_delivery` → `entregado` | Danilo (confirma entrega) | CU9b | `historial_pedido` + `tiempo_real_entrega` |
+| 6 | Auto → `retrasado` | Sistema (flag automático) | CU8 | No es transición manual. El dashboard de Sandro lo resalta en rojo. |
+| 7 | cualquiera → `cancelado` | Danilo | CU12 | `historial_pedido` + `motivo_cancelacion` |
+
+**Validaciones backend:**
+- CU43a: Solo si `estado = 'pendiente'` y el empleado tiene rol `cocinero`
+- CU43b: Solo si `estado = 'en_preparacion'` y `cocinero_asignado_id = quien hace la acción`
+- CU12: Solo si el pedido no está ya en `entregado` o `cancelado`
+
+---
+
+## 7. Puntos de Sinergia
 
 Las sinergias son las relaciones entre tablas de equipos distintos. Son la razón de ser del sistema unificado.
 
-| # | Situación real | FK | Tabla A | Tabla B |
-|---|---------------|-----|---------|---------|
+| # | Situación real | FK | Origen | Destino |
+|---|---------------|-----|--------|---------|
 | 1 | Cocinero cambia estado de un pedido | `historial_pedido.cambiado_por` → `empleados.id` | Módulo A | Módulo B |
 | 2 | Despachador envía mensaje al cliente | `mensajes_cliente.enviado_por` → `empleados.id` | Módulo A | Módulo B |
 | 3 | Admin de Cocina solicita abastecimiento | `solicitudes_abastecimiento.solicitado_por` → `empleados.id` | Módulo A | Módulo B |
-| 4 | Técnico repara equipo | `mantenimientos.tecnico_id` → `empleados.id` | Módulo A | Módulo B |
-| 5 | Cocinero reporta incidente de cocina | `incidentes_cocina.reportado_por` → `empleados.id` | Módulo A | Módulo B |
-| 6 | Incidente de cocina asociado a equipo | `incidentes_cocina.equipo_id` → `equipos.id` | Módulo A | Módulo A |
-| 7 | Gerente asigna tarea a empleado | `tareas.asignado_a` → `empleados.id` | Módulo B | Módulo B |
-| 8 | Gerente asigna tarea sobre un equipo | `tareas.equipo_relacionado_id` → `equipos.id` | Módulo B | Módulo A |
-| 9 | Empleado reporta incidente personal | `incidentes_personal.reportado_por` → `empleados.id` | Módulo B | Módulo B |
-| 10 | Incidente personal identifica afectado | `incidentes_personal.empleado_afectado_id` → `empleados.id` | Módulo B | Módulo B |
+| 4 | Admin aprueba/rechaza solicitud | `solicitudes_abastecimiento.procesado_por` → `empleados.id` | Módulo A | Módulo B |
+| 5 | Técnico repara equipo | `mantenimientos.tecnico_id` → `empleados.id` | Módulo A | Módulo B |
+| 6 | Cocinero reporta incidencia | `incidencias.reportado_por` → `empleados.id` | Unificada | Módulo B |
+| 7 | Incidencia afecta a empleado | `incidencias.empleado_afectado_id` → `empleados.id` | Unificada | Módulo B |
+| 8 | Incidencia vinculada a equipo | `incidencias.equipo_id` → `equipos.id` | Unificada | Módulo A |
+| 9 | Gerente asigna tarea a empleado | `tareas.asignado_a` → `empleados.id` | Módulo B | Módulo B |
+| 10 | Gerente asigna tarea sobre un equipo | `tareas.equipo_relacionado_id` → `equipos.id` | Módulo B | Módulo A |
 | 11 | Pedido asignado a cocinero | `pedidos.cocinero_asignado_id` → `empleados.id` | Datos estáticos | Módulo B |
 | 12 | Pedido asignado a despachador | `pedidos.despachador_asignado_id` → `empleados.id` | Datos estáticos | Módulo B |
+| 13 | Pago registrado por empleado | `pagos.registrado_por` → `empleados.id` | Módulo A | Módulo B |
 
 ---
 
-## Casos de Uso por Responsable
+## 8. Casos de Uso
 
 ### Módulo A — Herederos de Epstein
 
-| CU | Responsable | Actor | Descripción |
-|----|-------------|-------|-------------|
-| CU43 | Nihaht | Personal de Cocina | Despachar pedido: cambiar estado de "en preparación" a "terminado" |
-| CU44 | Nihaht | Personal de Cocina | Visualizar cola de producción con filtros (ingrediente, cantidad, tiempo) |
-| CU45 | Nihaht | Personal de Cocina | Reportar incidencia en cocina (falta insumo, falla equipo) |
-| CU5 | Sandro | Admin de Cocina | Gestionar abastecimiento de insumos vía solicitudes automáticas |
-| CU6 | Sandro | Admin de Cocina | Gestionar personal de cocina (turnos y roles) |
-| CU7 | Sandro | Despachador | Registrar pedido para cocina (recibe de la app estática) |
-| CU8 | Sandro | Despachador | Supervisar progreso de pedidos |
-| CU9 | Danilo | Despachador | Coordinar despacho con delivery |
-| CU10 | Danilo | Despachador | Gestionar comunicación con cliente |
-| CU11 | Danilo | Despachador | Registrar pago de entrega |
-| CU12 | Danilo | Despachador | Cancelar pedido de cliente |
+| CU | Responsable | Actor | Descripción | Tablas involucradas |
+|----|-------------|-------|-------------|---------------------|
+| **CU43a** | Nihaht | Cocinero | Tomar pedido: `pendiente` → `en_preparacion`, bloquea el pedido | pedidos, historial_pedido |
+| **CU43b** | Nihaht | Cocinero | Terminar pedido: `en_preparacion` → `terminado` | pedidos, historial_pedido |
+| **CU44** | Nihaht | Cocinero | Cola de producción con filtros por ingrediente, cantidad y tiempo | pedidos, items_pedido, ingredientes_item |
+| **CU45** | Nihaht | Cocinero | Reportar incidencia (falta_insumo, falla_equipo, otro) | incidencias, equipos, inventario |
+| CU5 | Sandro | Admin Cocina | Gestionar abastecimiento vía solicitudes de aumento/disminución | inventario, solicitudes_abastecimiento |
+| CU6 | Sandro | Admin Cocina | Gestionar turnos del personal de cocina | horarios_asistencias, empleados |
+| CU7 | Sandro | Admin Cocina | Registrar pedido desde datos estáticos al flujo de cocina | pedidos, historial_pedido |
+| CU8 | Sandro | Admin Cocina | Supervisar progreso de pedidos + alertas de retraso | pedidos |
+| CU9a | Danilo | Despachador | Enviar a delivery: `terminado` → `en_delivery` | pedidos, historial_pedido |
+| CU9b | Danilo | Despachador | Confirmar entrega: `en_delivery` → `entregado` | pedidos, historial_pedido |
+| CU10 | Danilo | Despachador | Gestionar comunicación con cliente | mensajes_cliente, pedidos |
+| CU11 | Danilo | Despachador | Registrar pago de entrega | pagos, pedidos |
+| CU12 | Danilo | Despachador | Cancelar pedido (desde cualquier estado no terminal) | pedidos, historial_pedido |
 
 ### Módulo B — Rocket
 
@@ -415,7 +470,50 @@ Las sinergias son las relaciones entre tablas de equipos distintos. Son la razó
 
 ---
 
-## Estructura del Proyecto
+## 9. Navegación de la Aplicación
+
+El layout tiene un **navbar superior** con logo, sucursal activa y avatar del usuario, y un **sidebar lateral** con navegación agrupada en dos módulos:
+
+```
+Sidebar
+├── 🏠 Dashboard
+│
+├── 🍳 Actividades de Cocina y Delivery
+│   ├── Órdenes           → pedidos, historial_pedido
+│   ├── Cola Producción   → pedidos (filtro), items_pedido, ingredientes_item
+│   ├── Delivery          → pedidos en_delivery, mensajes_cliente
+│   ├── Inventario        → inventario, solicitudes_abastecimiento
+│   ├── Equipos           → equipos, mantenimientos
+│   └── Pagos             → pagos
+│
+├── 👥 Gestión de Personal
+│   ├── Empleados         → empleados
+│   ├── Turnos y Asist.   → horarios_asistencias
+│   ├── Tareas            → tareas
+│   └── Áreas             → areas
+│
+└── ⚠️ Incidencias        → incidencias
+```
+
+Cada ítem usa `react-router-dom` con resaltado automático al estar activo. El sidebar es colapsable (solo íconos) y responsive (se oculta en móvil con toggle).
+
+---
+
+## 10. Roles del Sistema
+
+| Rol | Acceso |
+|-----|--------|
+| `admin` | Todo el sistema |
+| `gerente` | Personal, turnos, tareas, incidencias, dashboard |
+| `cocinero` | Órdenes (solo las asignadas), cola de producción, incidencias de cocina |
+| `despachador` | Órdenes, delivery, mensajes a cliente, pagos |
+| `cajero` | Pagos, consulta de pedidos |
+| `aseo` | Tareas asignadas, áreas, reportar cumplimiento, incidencias personales |
+| `mantenimiento` | Equipos, mantenimientos, tareas de reparación |
+
+---
+
+## 11. Estructura del Proyecto
 
 ```
 DeliverThePeople/
@@ -427,22 +525,32 @@ DeliverThePeople/
 │   │   │   └── layout/
 │   │   │       ├── AppLayout.jsx        # Navbar + Sidebar + Outlet
 │   │   │       ├── Navbar.jsx           # Barra superior
-│   │   │       └── Sidebar.jsx          # 9 ítems de navegación
+│   │   │       └── Sidebar.jsx          # Navegación en 2 módulos
 │   │   ├── pages/
 │   │   │   ├── auth/
 │   │   │   │   └── Login.jsx
-│   │   │   ├── Dashboard.jsx            # KPIs del sistema
-│   │   │   ├── PlaceholderPage.jsx      # "Módulo en desarrollo"
+│   │   │   ├── dashboard/
+│   │   │   │   └── Dashboard.jsx
+│   │   │   ├── ordenes/                 # Nihaht: CU43, CU44
+│   │   │   ├── delivery/                # Danilo: CU9, CU10, CU12
+│   │   │   ├── inventario/              # Sandro: CU5
+│   │   │   ├── equipos/                 # Nihaht: CU45 (parte)
+│   │   │   ├── pagos/                   # Danilo: CU11
+│   │   │   ├── empleados/               # Rocket
+│   │   │   ├── horarios/                # Rocket
+│   │   │   ├── tareas/                  # Rocket
+│   │   │   ├── areas/                   # Rocket
+│   │   │   ├── incidencias/             # Ambos equipos
 │   │   │   └── NotFound.jsx
 │   │   ├── context/
-│   │   │   └── AuthContext.jsx          # Autenticación JWT
+│   │   │   └── AuthContext.jsx
 │   │   ├── services/
 │   │   │   └── api.js                   # Axios config
 │   │   ├── hooks/
 │   │   │   └── useAuth.js
 │   │   ├── router/
-│   │   │   ├── AppRouter.jsx            # Rutas de la app
-│   │   │   └── PrivateRoute.jsx         # Protección por rol
+│   │   │   ├── AppRouter.jsx
+│   │   │   └── PrivateRoute.jsx
 │   │   ├── App.jsx
 │   │   ├── main.jsx
 │   │   └── index.css                    # Tailwind
@@ -456,72 +564,56 @@ DeliverThePeople/
 │   ├── models/                          # Queries SQL por tabla
 │   │   ├── empleado.js
 │   │   ├── pedido.js
+│   │   ├── historialPedido.js
+│   │   ├── itemsPedido.js
+│   │   ├── ingredientesItem.js
 │   │   ├── inventario.js
+│   │   ├── solicitudAbastecimiento.js
 │   │   ├── equipo.js
+│   │   ├── mantenimiento.js
+│   │   ├── mensajeCliente.js
+│   │   ├── pago.js
+│   │   ├── horarioAsistencia.js
+│   │   ├── area.js
 │   │   ├── tarea.js
-│   │   ├── incidenteCocina.js
-│   │   ├── incidentePersonal.js
-│   │   ├── turno.js
-│   │   └── asistencia.js
+│   │   └── incidencia.js
 │   ├── controllers/                     # Lógica de negocio
-│   │   ├── authController.js
-│   │   ├── empleadoController.js
-│   │   ├── pedidoController.js
-│   │   ├── inventarioController.js
-│   │   ├── equipoController.js
-│   │   ├── tareaController.js
-│   │   ├── incidenteCocinaController.js
-│   │   ├── incidentePersonalController.js
-│   │   ├── turnoController.js
-│   │   └── asistenciaController.js
 │   ├── routes/                          # Endpoints REST
-│   │   ├── authRoutes.js
-│   │   ├── empleadoRoutes.js
-│   │   ├── pedidoRoutes.js
-│   │   ├── inventarioRoutes.js
-│   │   ├── equipoRoutes.js
-│   │   ├── tareaRoutes.js
-│   │   ├── incidenteCocinaRoutes.js
-│   │   ├── incidentePersonalRoutes.js
-│   │   ├── turnoRoutes.js
-│   │   └── asistenciaRoutes.js
 │   ├── middleware/
 │   │   ├── auth.js                      # JWT verify
 │   │   ├── roleGuard.js                 # Autorización por rol
-│   │   ├── validate.js                  # Validación de body
 │   │   └── errorHandler.js              # Errores centralizados
 │   ├── utils/
 │   │   └── jwt.js                       # sign / verify
-│   ├── seeds/                           # Datos de prueba
-│   │   ├── sucursales.js
-│   │   ├── empleados.js
-│   │   ├── pedidos.js
-│   │   └── index.js
+│   ├── seeds/
 │   ├── app.js
 │   └── server.js
 │
 ├── database/
 │   └── migrations/
-│       └── 00001_esquema_inicial.sql    # DDL completo del sistema
+│       └── 00001_esquema_inicial.sql    # DDL completo del sistema (16 tablas)
 │
-├── .env
 ├── .env.example
 ├── .gitignore
+├── GUIA_SUPABASE_DANILO.md              # Guía paso a paso para Danilo
+├── GUIA_FRONTEND_SANDRO.md              # Guía paso a paso para Sandro
 ├── README.md
-└── package.json                         # concurrently
+└── package.json                         # Raíz con concurrently
 ```
 
 ---
 
-## Configuración Inicial
+## 12. Configuración Inicial
 
 ### Requisitos
 
 - Node.js 18+
-- PostgreSQL (Supabase)
+- Cuenta gratuita en [Supabase](https://supabase.com)
 - Git
 
 ### Variables de Entorno (.env)
+
+Copiar `.env.example` a `.env` y llenar:
 
 ```env
 # Servidor
@@ -545,76 +637,61 @@ VITE_API_URL=http://localhost:3001/api
 ### Instalación
 
 ```bash
-# Clonar
+# 1. Clonar
 git clone https://github.com/NihahtMontes/DeliverThePeople.git
 cd DeliverThePeople
 
-# Instalar dependencias
+# 2. Instalar dependencias raíz
 npm install
-npm install --prefix client
-npm install --prefix server
 
-# Crear base de datos en Supabase y ejecutar la migración
+# 3. Instalar dependencias del servidor
+cd server
+npm install
+cd ..
+
+# 4. Crear base de datos en Supabase y ejecutar la migración
+#    (Danilo hace esto una sola vez)
 psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -f database/migrations/00001_esquema_inicial.sql
 
-# Insertar datos de prueba
+# 5. Insertar datos de prueba
+#    (Danilo hace esto una sola vez)
 npm run seed
 
-# Iniciar en desarrollo (frontend + backend)
+# 6. Iniciar en desarrollo (frontend + backend en paralelo)
 npm run dev
 ```
 
 ---
 
-## Navegación de la Aplicación
+## 13. Plan de Desarrollo
 
-El layout tiene un **navbar superior** con logo, sucursal activa y avatar del usuario, y un **sidebar lateral** con 9 ítems de navegación agrupados:
-
-| Grupo | Ítems |
-|-------|-------|
-| Principal | Dashboard |
-| Operaciones | Órdenes, Delivery, Inventario, Equipos |
-| Personal | Empleados, Turnos, Tareas |
-| Sistema | Incidencias |
-
-Cada ítem usa `react-router-dom` con resaltado automático al estar activo. El sidebar es colapsable (solo íconos) y responsive (se oculta en móvil con toggle).
-
----
-
-## Roles del Sistema
-
-| Rol | Acceso |
-|-----|--------|
-| `admin` | Todo el sistema |
-| `gerente` | Personal, turnos, tareas, incidencias, dashboard |
-| `cocinero` | Órdenes (solo las asignadas), historial de pedidos, reportar incidencias de cocina |
-| `despachador` | Órdenes, delivery, mensajes a cliente, pagos |
-| `cajero` | Pagos, consulta de pedidos |
-| `aseo` | Tareas asignadas, áreas, reportar cumplimiento, incidentes personales |
-| `mantenimiento` | Equipos, mantenimientos, tareas de reparación |
+| Día | Fecha | Objetivo | Responsable |
+|-----|-------|----------|-------------|
+| **1** | Lun 9 Jun | Definición del modelo de datos + README + DDL | Nihaht |
+| **2** | Mar 10 Jun | Supabase configurado + Backend base Express | Danilo + Nihaht |
+| **3** | Mié 11 Jun | Frontend base: Layout + Router + Auth + Dashboard | Sandro |
+| **4** | Jue 12 Jun | CUs de Cocina (CU43, CU44, CU45) + Inventario (CU5) | Nihaht + Sandro |
+| **5** | Vie 13 Jun | CUs de Delivery (CU9-CU12) + Placeholders para Rocket | Danilo |
+| — | Sáb 14 Jun | Módulo B completo (CU1-CU12) | Rocket |
+| — | Dom 15 Jun | Integración final, testing, correcciones | Todos |
+| — | Lun 16 Jun | Entrega | — |
 
 ---
 
-## Plan de Desarrollo (5 Días)
+## 14. Guías del Equipo
 
-| Día | Fecha | Objetivo |
-|-----|-------|----------|
-| **1** | Lun 9 Jun | Schema SQL completo + Setup del proyecto (Vite, Express, pg, Tailwind, concurrently) |
-| **2** | Mar 10 Jun | Layout (Navbar + Sidebar + Router con 9 rutas) + Auth (JWT login/registro) |
-| **3** | Mié 11 Jun | Dashboard con KPIs + Seeds de prueba + PlaceholderPages |
-| **4** | Jue 12 Jun | CRUDs esenciales (empleados, inventario, equipos, tareas) + Sidebar responsive |
-| **5** | Vie 13 Jun | Integración: conectar frontend a datos reales, pulir interacción, testing |
-| — | Sáb 14 Jun | Buffer: correcciones finales, demo |
+Documentos paso a paso para los responsables de infraestructura:
+
+| Guía | Para | Contenido |
+|------|------|-----------|
+| [`GUIA_SUPABASE_DANILO.md`](GUIA_SUPABASE_DANILO.md) | Danilo | Crear proyecto Supabase, ejecutar DDL, seeds, compartir acceso con los 6 |
+| [`GUIA_FRONTEND_SANDRO.md`](GUIA_FRONTEND_SANDRO.md) | Sandro | Setup de Vite + React + Tailwind, layout, router, auth, sus CUs, placeholders |
 
 ---
 
-## Licencia
+## 15. Licencia y Equipos
 
 Este proyecto es privado y de uso interno para el restaurante.
-
----
-
-## Equipos
 
 | Equipo | Integrantes | Módulo |
 |--------|-------------|--------|

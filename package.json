@@ -1,0 +1,16 @@
+{
+  "name": "deliverthepeople",
+  "version": "1.0.0",
+  "description": "Sistema Integral de Gestión de Restaurante: Cocina, Delivery y Recursos Humanos",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "seed": "npm run seed --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

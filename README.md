@@ -11,6 +11,7 @@ Una plataforma web que fusiona dos módulos de software desarrollados por dos eq
 **Valor principal:** los cocineros, despachadores y demás personal que operan en cocina son los mismos empleados creados y gestionados por Recursos Humanos. Un solo sistema, una sola fuente de verdad.
 
 ---
+<img width="697" height="306" alt="image" src="https://github.com/user-attachments/assets/739ce12b-c7a4-46dd-b9c3-27951cabee10" />
 
 ## Los Dos Equipos
 

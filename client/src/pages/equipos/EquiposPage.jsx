@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import {
-  Plus, Edit2, Trash2, Wrench, Loader, Eye, Archive,
-  Hash, Calendar, AlertTriangle, CheckCircle, RotateCcw
+  Plus, Edit2, Wrench, Loader, Eye, Archive,
+  CheckCircle, RotateCcw
 } from 'lucide-react'
 import api from '../../services/api'
 import GlassModal from '../../components/ui/GlassModal'
+import { useToast } from '../../hooks/useToast'
 
 const TIPOS = ['horno', 'refrigerador', 'congelador', 'estufa', 'lavavajillas', 'batidora', 'freidora', 'otro']
 const URGENCIAS = [
@@ -37,6 +38,7 @@ const FORM_INICIAL = {
 const FORM_MOV_INICIAL = { descripcion_falla: '', urgencia: 'MEDIA', observaciones_inicio: '' }
 
 export default function EquiposPage() {
+  const toast = useToast()
   const [equipos, setEquipos]             = useState([])
   const [loading, setLoading]             = useState(true)
   const [error, setError]                 = useState(null)
@@ -120,7 +122,7 @@ export default function EquiposPage() {
       setModalForm(false)
       fetchEquipos()
     } catch (err) {
-      alert(err.response?.data?.error || 'Error al guardar el equipo.')
+      toast.error(err.response?.data?.error || 'Error al guardar el equipo.')
     } finally {
       setSubmitting(false)
     }
@@ -132,7 +134,7 @@ export default function EquiposPage() {
       setModalBaja(false)
       fetchEquipos()
     } catch (err) {
-      alert(err.response?.data?.error || 'Error al dar de baja el equipo.')
+      toast.error(err.response?.data?.error || 'Error al dar de baja el equipo.')
     }
   }
 
@@ -141,7 +143,7 @@ export default function EquiposPage() {
       await api.post(`/equipos/${eq.id}/reactivar`)
       fetchEquipos()
     } catch (err) {
-      alert(err.response?.data?.error || 'Error al reactivar el equipo.')
+      toast.error(err.response?.data?.error || 'Error al reactivar el equipo.')
     }
   }
 
@@ -154,7 +156,7 @@ export default function EquiposPage() {
       setModalMant(false)
       fetchEquipos()
     } catch (err) {
-      alert(err.response?.data?.error || 'Error al solicitar mantenimiento.')
+      toast.error(err.response?.data?.error || 'Error al solicitar mantenimiento.')
     } finally {
       setSubmitting(false)
     }

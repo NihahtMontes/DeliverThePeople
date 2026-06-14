@@ -7,55 +7,45 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
 
-    // Función auxiliar para decodificar la información del usuario del JWT
-    const decodeToken = (token) => {
-        try {
-            const base64Url = token.split('.')[1]
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-            const jsonPayload = decodeURIComponent(
-                window.atob(base64)
-                    .split('')
-                    .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                    .join('')
-            )
-            return JSON.parse(jsonPayload)
-        } catch (error) {
-            return null
-        }
-    }
-
     useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (token) {
-            const decoded = decodeToken(token)
-            if (decoded) {
-                setUser(decoded)
-            } else {
+        const verifySession = async () => {
+            const token = localStorage.getItem('token')
+            if (!token) {
+                setLoading(false)
+                return
+            }
+
+            try {
+                const response = await api.get('/auth/me')
+                setUser(response.data.user)
+            } catch {
                 localStorage.removeItem('token')
+                setUser(null)
+            } finally {
+                setLoading(false)
             }
         }
-        setLoading(false)
+
+        verifySession()
     }, [])
 
     const login = async (email, password) => {
         try {
             const response = await api.post('/auth/login', { email, password })
-            const { token } = response.data
+            const { token, user: userData } = response.data
 
             localStorage.setItem('token', token)
-            const decoded = decodeToken(token)
-            setUser(decoded)
+            setUser(userData)
             return { success: true }
         } catch (error) {
-            console.error(error)
-            throw new Error(error.response?.data?.message || 'Credenciales inválidas o error de servidor')
+            throw new Error(error.response?.data?.error || 'Credenciales inválidas o error de servidor')
         }
     }
 
     const logout = () => {
         localStorage.removeItem('token')
         setUser(null)
-        window.location.href = '/login'
+        window.location.replace('/login')
     }
 
     return (

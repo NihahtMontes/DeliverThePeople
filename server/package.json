@@ -4,15 +4,16 @@
   "description": "Backend API for DeliverThePeople",
   "main": "server.js",
   "scripts": {
-    "dev": "node --watch server.js",
-    "start": "node server.js",
-    "seed": "node seeds/index.js"
+    "dev": "bun --watch server.js",
+    "start": "bun server.js",
+    "seed": "bun seeds/index.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.0"
   }

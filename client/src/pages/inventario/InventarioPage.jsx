@@ -56,7 +56,7 @@ const InventarioPage = () => {
     try {
       setLoading(true);
       const response = await api.get('/inventario');
-      setInsumos(response.data);
+      setInsumos(response.data.productos || []);
     } catch (error) {
       toast.error('Error al cargar inventario');
     } finally {
@@ -263,9 +263,9 @@ const InventarioPage = () => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan="4" className="py-8 text-center text-gray-500">Cargando inventario...</td></tr>
+                <tr><td colSpan="5" className="py-8 text-center text-gray-500">Cargando inventario...</td></tr>
               ) : insumosFiltrados.length === 0 ? (
-                <tr><td colSpan="4" className="py-8 text-center text-gray-500">No se encontraron insumos.</td></tr>
+                <tr><td colSpan="5" className="py-8 text-center text-gray-500">No se encontraron insumos.</td></tr>
               ) : (
                 insumosFiltrados.map((insumo) => {
                   const isCritico = Number(insumo.cantidad_actual) <= Number(insumo.stock_minimo);

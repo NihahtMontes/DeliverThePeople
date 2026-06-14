@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import {
   Wrench, Loader, AlertTriangle, Clock, CheckCircle2,
-  XCircle, Eye, FileText, DollarSign, AlertCircle
+  Eye, FileText, DollarSign
 } from 'lucide-react'
 import api from '../../services/api'
 import GlassModal from '../../components/ui/GlassModal'
+import { useToast } from '../../hooks/useToast'
 
 const URGENCIA_CONFIG = {
   BAJA:    { label: 'Baja',    cls: 'bg-gray-100 text-gray-600 border border-gray-200' },
@@ -38,6 +39,7 @@ const URGENCIAS = [
 ]
 
 export default function MantenimientoPage() {
+  const toast = useToast()
   const [mantenimientos, setMantenimientos] = useState([])
   const [equipos, setEquipos]               = useState([])
   const [loading, setLoading]               = useState(true)
@@ -116,7 +118,7 @@ export default function MantenimientoPage() {
       setModalIniciar(false)
       fetchMantenimientos()
     } catch (err) {
-      alert(err.response?.data?.error || 'Error al iniciar el mantenimiento.')
+      toast.error(err.response?.data?.error || 'Error al iniciar el mantenimiento.')
     } finally {
       setSubmitting(false)
     }
@@ -130,7 +132,7 @@ export default function MantenimientoPage() {
       setModalDiag(false)
       fetchMantenimientos()
     } catch (err) {
-      alert(err.response?.data?.error || 'Error al guardar el diagnóstico.')
+      toast.error(err.response?.data?.error || 'Error al guardar el diagnóstico.')
     } finally {
       setSubmitting(false)
     }
@@ -144,7 +146,7 @@ export default function MantenimientoPage() {
       setModalFinalizar(false)
       fetchMantenimientos()
     } catch (err) {
-      alert(err.response?.data?.error || 'Error al finalizar el mantenimiento.')
+      toast.error(err.response?.data?.error || 'Error al finalizar el mantenimiento.')
     } finally {
       setSubmitting(false)
     }

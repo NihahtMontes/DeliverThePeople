@@ -47,8 +47,8 @@ Una plataforma web que fusiona dos modulos de software en un solo sistema de ges
 | **2. Backend** | **Nihaht** | Servidor Express con controllers y rutas | Paso 1 |
 | **3. Frontend Base** | **Sandro** | Layout (Navbar + Sidebar + Router), auth, Dashboard, placeholders | Paso 2 |
 | **4. CUs de Cocina** | **Nihaht** | CU43, CU44, CU45 (Ordenes, Cola de Produccion, Incidencias) | Paso 3 |
-| **5. CUs de Operaciones** | **Sandro** | CU5, CU6, CU7, CU8 (Inventario, Solicitudes, Registrar Pedido, Dashboard) | Paso 3 |
-| **6. CUs de Delivery** | **Danilo** | CU9, CU10, CU11, CU12 (Despacho, Chat, Pagos, Cancelacion) | Paso 3 |
+| **5. CUs de Operaciones** | **Sandro** | CU46, CU47, CU48, CU49 (Inventario, Movimientos, Mantenimiento, Equipos) | Paso 3 |
+| **6. CUs de Delivery** | **Danilo** | CU11, CU50, CU51, CU52 (Pagos, Despacho, Chat, Cancelacion) | Paso 3 |
 | **7. CUs de Personal** | **Rocket** | CU1-CU12 del Modulo B (Empleados, Turnos, Tareas, Areas, Incidencias) | Paso 3 |
 
 **Regla:** Nadie avanza sin que el paso anterior este completado y verificado.
@@ -148,15 +148,14 @@ PENDIENTE → EN_PREPARACION → LISTO → ENTREGADO
 | **CU43** | Nihaht | Despachar pedido: PENDIENTE → EN_PREPARACION → LISTO | **COMPLETADO** |
 | **CU44** | Nihaht | Cola de produccion con filtros (ingrediente, tiempo, estado) | **COMPLETADO** |
 | **CU45** | Nihaht | Reportar incidencia en cocina (falta ingrediente, cambio) | **COMPLETADO** |
-| CU5 | Sandro | Gestionar inventario via movimientos | **COMPLETADO** |
-| CU6 | Sandro | Gestionar turnos del personal | Pendiente |
-| CU7 | Sandro | Registrar pedido al flujo de cocina | Pendiente |
-| CU8 | Sandro | Supervisar progreso + alertas de retraso | Pendiente |
-| CU9a | Danilo | Enviar a delivery: LISTO → EN_DELIVERY | Pendiente |
-| CU9b | Danilo | Confirmar entrega: EN_DELIVERY → ENTREGADO | Pendiente |
-| CU10 | Danilo | Comunicacion con cliente | Pendiente |
+| **CU46** | Sandro | Gestión de Inventario (Tabla: inventario) | **COMPLETADO** |
+| **CU47** | Sandro | Control de Movimientos de Stock (Tabla: movimiento_inventario) | **COMPLETADO** |
+| **CU48** | Sandro | Gestión de Solicitudes de Mantenimiento (Tabla: mantenimientos) | **COMPLETADO** |
+| **CU49** | Sandro | Gestión de Activos de Cocina (Tabla: equipos) | **COMPLETADO** |
+| **CU50** | Danilo | Coordinar despacho con Delivery | Pendiente |
+| **CU51** | Danilo | Gestionar comunicación con cliente | Pendiente |
 | CU11 | Danilo | Registrar pago | Pendiente |
-| CU12 | Danilo | Cancelar pedido | **COMPLETADO** (endpoint listo) |
+| **CU52** | Danilo | Cancelar pedido de cliente | **COMPLETADO** (endpoint listo) |
 
 ### Modulo B — Rocket
 

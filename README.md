@@ -51,8 +51,8 @@ La construcción del proyecto sigue un orden obligatorio para evitar bloqueos:
 | **2. Backend** | **Nihaht** | Servidor Express con modelos, controllers y rutas para todas las tablas | Paso 1 |
 | **3. Frontend Base** | **Sandro** | Layout (Navbar + Sidebar + Router), sistema de login, Dashboard, placeholders para todas las rutas | Paso 2 |
 | **4. CUs de Cocina** | **Nihaht** | CU43, CU44, CU45 (Órdenes, Cola de Producción, Incidencias) | Paso 3 |
-| **5. CUs de Operaciones** | **Sandro** | CU5, CU6, CU7, CU8 (Inventario, Solicitudes, Registrar Pedido, Dashboard) | Paso 3 |
-| **6. CUs de Delivery** | **Danilo** | CU9, CU10, CU11, CU12 (Despacho, Chat, Pagos, Cancelación) | Paso 3 |
+| **5. CUs de Operaciones** | **Sandro** | CU46, CU47, CU48, CU49 (Inventario, Movimientos, Mantenimiento, Equipos) | Paso 3 |
+| **6. CUs de Delivery** | **Danilo** | CU11, CU50, CU51, CU52 (Despacho, Chat, Pagos, Cancelación) | Paso 3 |
 | **7. CUs de Personal** | **Rocket** | CU1-CU12 del Módulo B (Empleados, Turnos, Tareas, Áreas, Incidencias) | Paso 3 |
 
 **Regla:** Nadie avanza sin que el paso anterior esté completado y verificado.
@@ -458,15 +458,14 @@ Las sinergias son las relaciones entre tablas de equipos distintos. Son la razó
 | **CU43b** | Nihaht | Cocinero | Terminar pedido: `en_preparacion` → `terminado` | pedidos, historial_pedido |
 | **CU44** | Nihaht | Cocinero | Cola de producción con filtros por ingrediente, cantidad y tiempo | pedidos, items_pedido, ingredientes_item |
 | **CU45** | Nihaht | Cocinero | Reportar incidencia (falta_insumo, falla_equipo, otro) | incidencias, equipos, inventario |
-| CU5 | Sandro | Admin Cocina | Gestionar inventario vía movimientos de entrada y salida | inventario, movimiento_inventario |
-| CU6 | Sandro | Admin Cocina | Gestionar turnos del personal de cocina | horarios_asistencias, empleados |
-| CU7 | Sandro | Admin Cocina | Registrar pedido desde datos estáticos al flujo de cocina | pedidos, historial_pedido |
-| CU8 | Sandro | Admin Cocina | Supervisar progreso de pedidos + alertas de retraso | pedidos |
-| CU9a | Danilo | Despachador | Enviar a delivery: `terminado` → `en_delivery` | pedidos, historial_pedido |
-| CU9b | Danilo | Despachador | Confirmar entrega: `en_delivery` → `entregado` | pedidos, historial_pedido |
-| CU10 | Danilo | Despachador | Gestionar comunicación con cliente | mensajes_cliente, pedidos |
+| **CU46** | Sandro | Admin Cocina | Gestión de Inventario | inventario |
+| **CU47** | Sandro | Admin Cocina | Control de Movimientos de Stock | movimiento_inventario |
+| **CU48** | Sandro | Admin Cocina | Gestión de Solicitudes de Mantenimiento | mantenimientos |
+| **CU49** | Sandro | Admin Cocina | Gestión de Activos de Cocina | equipos |
+| **CU50** | Danilo | Despachador | Coordinar despacho con Delivery | pedidos, historial_pedido |
+| **CU51** | Danilo | Despachador | Gestionar comunicación con cliente | mensajes_cliente, pedidos |
 | CU11 | Danilo | Despachador | Registrar pago de entrega | pagos, pedidos |
-| CU12 | Danilo | Despachador | Cancelar pedido (desde cualquier estado no terminal) | pedidos, historial_pedido |
+| **CU52** | Danilo | Despachador | Cancelar pedido de cliente | pedidos, historial_pedido |
 
 ### Módulo B — Rocket
 

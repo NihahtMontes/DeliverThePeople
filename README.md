@@ -1,4 +1,3 @@
-# DeliverThePeople
 
 Sistema Integral de Gestion de Restaurante: Cocina, Delivery y Recursos Humanos.
 

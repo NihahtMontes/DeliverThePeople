@@ -15,7 +15,7 @@ Sistema Integral de Gestión de Restaurante: Cocina, Delivery y Recursos Humanos
 | 5 | [Modelo de Datos Definitivo](#5-modelo-de-datos-definitivo) | 16 tablas del sistema |
 | 5.0 | └ [Diagrama de Navegación de Tablas](#50-diagrama-de-navegación-de-tablas) | Mapa rápido de relaciones |
 | 5.1 | └ [Núcleo Compartido](#51-núcleo-compartido) | sucursales, empleados |
-| 5.2 | └ [Módulo A: Cocina y Delivery](#52-módulo-a-cocina-y-delivery) | inventario, solicitudes, pedidos, historial, mensajes, equipos, mantenimientos, pagos, items, ingredientes |
+| 5.2 | └ [Módulo A: Cocina y Delivery](#52-módulo-a-cocina-y-delivery) | inventario, movimientos, pedidos, historial, mensajes, equipos, mantenimientos, pagos, items, ingredientes |
 | 5.3 | └ [Módulo B: Personal](#53-módulo-b-personal) | horarios_asistencias, areas, tareas |
 | 5.4 | └ [Tabla Unificada de Incidencias](#54-tabla-unificada-de-incidencias) | incidencias (cocina + personal) |
 | 5.5 | └ [Datos Estáticos](#55-datos-estáticos) | pedidos, items_pedido, ingredientes_item, pagos |
@@ -118,11 +118,11 @@ sucursales ──┬── empleados ──┬── horarios_asistencias
              │               ├── pedidos (cocinero, despachador)
              │               ├── historial_pedido (cambiado_por)
              │               ├── mensajes_cliente (enviado_por)
-             │               ├── solicitudes_abastecimiento (solicitado_por)
-             │               ├── mantenimientos (tecnico_id)
+             │               ├── movimiento_inventario (empleado_id)
+             │               ├── mantenimientos (solicitante_id)
              │               └── pagos (registrado_por)
              │
-             ├── inventario ─── solicitudes_abastecimiento
+             ├── inventario ─── movimiento_inventario
              ├── equipos ─── mantenimientos
              ├── equipos ─── incidencias (equipo_id)
              ├── equipos ─── tareas (equipo_relacionado_id)
@@ -175,29 +175,31 @@ sucursales ──┬── empleados ──┬── horarios_asistencias
 | `id` | UUID PK | Clave primaria |
 | `sucursal_id` | UUID → sucursales | Sucursal |
 | `nombre` | TEXT | Nombre del ingrediente, NOT NULL |
-| `categoria` | ENUM | `lacteo`, `carnico`, `verdura`, `seco`, `bebida`, `limpieza` |
-| `cantidad_actual` | NUMERIC(10,2) | Stock actual |
-| `unidad` | TEXT | kg, litros, unidades, g |
-| `stock_minimo` | NUMERIC(10,2) | Umbral de alerta |
-| `costo_unitario` | NUMERIC(10,2) | Precio por unidad |
-| `proveedor` | TEXT | Nombre del proveedor |
+| `categoria` | ENUM | `categoria_inventario`, NOT NULL |
+| `unidad` | TEXT | Unidad de medida, NOT NULL |
+| `cantidad_actual` | NUMERIC(10,2) | Stock actual, DEFAULT 0 |
+| `stock_minimo` | NUMERIC(10,2) | Umbral de alerta, DEFAULT 0 |
+| `costo_unitario` | NUMERIC(10,2) | Costo por unidad |
+| `activo` | BOOLEAN | DEFAULT true |
 | `created_at` | TIMESTAMPTZ | DEFAULT NOW() |
 | `updated_at` | TIMESTAMPTZ | DEFAULT NOW() |
 
-#### `solicitudes_abastecimiento` — Pedidos de más/menos stock
+#### `movimiento_inventario` — Movimientos de entrada y salida
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
 | `id` | UUID PK | Clave primaria |
-| `inventario_id` | UUID → inventario | Ingrediente afectado |
-| `tipo` | ENUM | `aumento`, `disminucion` |
-| `cantidad_solicitada` | NUMERIC(10,2) | Cuánto se pide |
-| `motivo` | TEXT | Razón del ajuste |
-| `estado` | ENUM | `pendiente`, `aprobada`, `rechazada` |
-| `solicitado_por` | UUID → empleados | **Sinergia** |
-| `procesado_por` | UUID → empleados | Quién aprobó/rechazó |
-| `fecha_solicitud` | TIMESTAMPTZ | DEFAULT NOW() |
-| `fecha_procesamiento` | TIMESTAMPTZ | Se llena al aprobar/rechazar |
+| `inventario_id` | UUID → inventario | Producto afectado |
+| `empleado_id` | UUID → empleados | **Sinergia** |
+| `tipo_movimiento` | ENUM | `tipo_movimiento`, NOT NULL |
+| `cantidad` | NUMERIC(10,2) | Cantidad movida, NOT NULL |
+| `stock_anterior` | NUMERIC(10,2) | Stock antes del movimiento, NOT NULL |
+| `stock_nuevo` | NUMERIC(10,2) | Stock después del movimiento, NOT NULL |
+| `motivo` | TEXT | Motivo del movimiento |
+| `observaciones` | TEXT | Observaciones adicionales |
+| `costo_unitario` | NUMERIC(10,2) | Costo por unidad |
+| `costo_total` | NUMERIC(10,2) | Costo total del movimiento |
+| `created_at` | TIMESTAMPTZ | DEFAULT NOW() |
 
 #### `equipos` — Equipos de cocina
 
@@ -206,11 +208,17 @@ sucursales ──┬── empleados ──┬── horarios_asistencias
 | `id` | UUID PK | Clave primaria |
 | `sucursal_id` | UUID → sucursales | Sucursal |
 | `nombre` | TEXT | Nombre del equipo, NOT NULL |
-| `tipo` | ENUM | `horno`, `refrigerador`, `congelador`, `estufa`, `freidora`, `lavavajillas`, `batidora`, `otro` |
-| `numero_serie` | TEXT | Número de serie |
-| `estado` | ENUM | `operativo`, `requiere_mantenimiento`, `fuera_de_servicio` |
+| `tipo` | TEXT | Tipo de equipo, NOT NULL |
+| `marca` | TEXT | Marca del equipo, NOT NULL |
+| `modelo` | TEXT | Modelo del equipo, NOT NULL |
+| `numero_serie` | TEXT | Número de serie, NOT NULL |
+| `capacidad` | TEXT | Capacidad del equipo |
+| `descripcion` | TEXT | Descripción adicional |
+| `estado` | ENUM | `estado_equipo`, DEFAULT 'OPERATIVO' |
 | `fecha_compra` | DATE | Fecha de adquisición |
+| `activo` | BOOLEAN | DEFAULT true |
 | `created_at` | TIMESTAMPTZ | DEFAULT NOW() |
+| `updated_at` | TIMESTAMPTZ | DEFAULT NOW() |
 
 #### `mantenimientos` — Historial de reparaciones
 
@@ -218,10 +226,20 @@ sucursales ──┬── empleados ──┬── horarios_asistencias
 |---------|------|-------------|
 | `id` | UUID PK | Clave primaria |
 | `equipo_id` | UUID → equipos | Equipo reparado |
-| `descripcion` | TEXT | Qué se hizo |
-| `tecnico_id` | UUID → empleados | **Sinergia** |
+| `solicitante_id` | UUID → empleados | **Sinergia** |
+| `numero_ticket` | SERIAL | Número de ticket autoincremental |
+| `descripcion_falla` | TEXT | Qué falla presenta, NOT NULL |
+| `observaciones_inicio` | TEXT | Observaciones al iniciar |
+| `diagnostico` | TEXT | Diagnóstico técnico |
+| `observaciones_cierre` | TEXT | Observaciones al cerrar |
+| `urgencia` | ENUM | `urgencia`, DEFAULT 'MEDIA' |
+| `estado_ticket` | ENUM | `estado_ticket`, DEFAULT 'PENDIENTE' |
 | `costo` | NUMERIC(10,2) | Costo de la reparación |
-| `fecha` | TIMESTAMPTZ | DEFAULT NOW() |
+| `fecha_solicitud` | TIMESTAMPTZ | DEFAULT NOW() |
+| `fecha_estimada` | TIMESTAMPTZ | Fecha estimada de reparación |
+| `fecha_cierre` | TIMESTAMPTZ | Fecha en que se cerró |
+| `created_at` | TIMESTAMPTZ | DEFAULT NOW() |
+| `updated_at` | TIMESTAMPTZ | DEFAULT NOW() |
 
 ---
 
@@ -417,17 +435,16 @@ Las sinergias son las relaciones entre tablas de equipos distintos. Son la razó
 |---|---------------|-----|--------|---------|
 | 1 | Cocinero cambia estado de un pedido | `historial_pedido.cambiado_por` → `empleados.id` | Módulo A | Módulo B |
 | 2 | Despachador envía mensaje al cliente | `mensajes_cliente.enviado_por` → `empleados.id` | Módulo A | Módulo B |
-| 3 | Admin de Cocina solicita abastecimiento | `solicitudes_abastecimiento.solicitado_por` → `empleados.id` | Módulo A | Módulo B |
-| 4 | Admin aprueba/rechaza solicitud | `solicitudes_abastecimiento.procesado_por` → `empleados.id` | Módulo A | Módulo B |
-| 5 | Técnico repara equipo | `mantenimientos.tecnico_id` → `empleados.id` | Módulo A | Módulo B |
-| 6 | Cocinero reporta incidencia | `incidencias.reportado_por` → `empleados.id` | Unificada | Módulo B |
-| 7 | Incidencia afecta a empleado | `incidencias.empleado_afectado_id` → `empleados.id` | Unificada | Módulo B |
-| 8 | Incidencia vinculada a equipo | `incidencias.equipo_id` → `equipos.id` | Unificada | Módulo A |
-| 9 | Gerente asigna tarea a empleado | `tareas.asignado_a` → `empleados.id` | Módulo B | Módulo B |
-| 10 | Gerente asigna tarea sobre un equipo | `tareas.equipo_relacionado_id` → `equipos.id` | Módulo B | Módulo A |
-| 11 | Pedido asignado a cocinero | `pedidos.cocinero_asignado_id` → `empleados.id` | Datos estáticos | Módulo B |
-| 12 | Pedido asignado a despachador | `pedidos.despachador_asignado_id` → `empleados.id` | Datos estáticos | Módulo B |
-| 13 | Pago registrado por empleado | `pagos.registrado_por` → `empleados.id` | Módulo A | Módulo B |
+| 3 | Empleado registra movimiento inventario | `movimiento_inventario.empleado_id` → `empleados.id` | Módulo A | Módulo B |
+| 4 | Empleado solicita mantenimiento | `mantenimientos.solicitante_id` → `empleados.id` | Módulo A | Módulo B |
+| 5 | Cocinero reporta incidencia | `incidencias.reportado_por` → `empleados.id` | Unificada | Módulo B |
+| 6 | Incidencia afecta a empleado | `incidencias.empleado_afectado_id` → `empleados.id` | Unificada | Módulo B |
+| 7 | Incidencia vinculada a equipo | `incidencias.equipo_id` → `equipos.id` | Unificada | Módulo A |
+| 8 | Gerente asigna tarea a empleado | `tareas.asignado_a` → `empleados.id` | Módulo B | Módulo B |
+| 9 | Gerente asigna tarea sobre un equipo | `tareas.equipo_relacionado_id` → `equipos.id` | Módulo B | Módulo A |
+| 10 | Pedido asignado a cocinero | `pedidos.cocinero_asignado_id` → `empleados.id` | Datos estáticos | Módulo B |
+| 11 | Pedido asignado a despachador | `pedidos.despachador_asignado_id` → `empleados.id` | Datos estáticos | Módulo B |
+| 12 | Pago registrado por empleado | `pagos.registrado_por` → `empleados.id` | Módulo A | Módulo B |
 
 ---
 
@@ -441,7 +458,7 @@ Las sinergias son las relaciones entre tablas de equipos distintos. Son la razó
 | **CU43b** | Nihaht | Cocinero | Terminar pedido: `en_preparacion` → `terminado` | pedidos, historial_pedido |
 | **CU44** | Nihaht | Cocinero | Cola de producción con filtros por ingrediente, cantidad y tiempo | pedidos, items_pedido, ingredientes_item |
 | **CU45** | Nihaht | Cocinero | Reportar incidencia (falta_insumo, falla_equipo, otro) | incidencias, equipos, inventario |
-| CU5 | Sandro | Admin Cocina | Gestionar abastecimiento vía solicitudes de aumento/disminución | inventario, solicitudes_abastecimiento |
+| CU5 | Sandro | Admin Cocina | Gestionar inventario vía movimientos de entrada y salida | inventario, movimiento_inventario |
 | CU6 | Sandro | Admin Cocina | Gestionar turnos del personal de cocina | horarios_asistencias, empleados |
 | CU7 | Sandro | Admin Cocina | Registrar pedido desde datos estáticos al flujo de cocina | pedidos, historial_pedido |
 | CU8 | Sandro | Admin Cocina | Supervisar progreso de pedidos + alertas de retraso | pedidos |
@@ -482,7 +499,7 @@ Sidebar
 │   ├── Órdenes           → pedidos, historial_pedido
 │   ├── Cola Producción   → pedidos (filtro), items_pedido, ingredientes_item
 │   ├── Delivery          → pedidos en_delivery, mensajes_cliente
-│   ├── Inventario        → inventario, solicitudes_abastecimiento
+│   ├── Inventario        → inventario, movimiento_inventario
 │   ├── Equipos           → equipos, mantenimientos
 │   └── Pagos             → pagos
 │

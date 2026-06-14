@@ -538,84 +538,106 @@ DeliverThePeople/
 ├── client/                              # Frontend — React + Vite
 │   ├── public/
 │   ├── src/
+│   │   ├── assets/
+│   │   │   ├── hero.png
+│   │   │   ├── logoDTP.png
+│   │   │   ├── logoIcono.png
+│   │   │   └── vite.svg
 │   │   ├── components/
-│   │   │   └── layout/
-│   │   │       ├── AppLayout.jsx        # Navbar + Sidebar + Outlet
-│   │   │       ├── Navbar.jsx           # Barra superior
-│   │   │       └── Sidebar.jsx          # Navegación en 2 módulos
-│   │   ├── pages/
+│   │   │   ├── layout/
+│   │   │   │   ├── AppLayout.jsx        # Navbar + Sidebar + Outlet
+│   │   │   │   ├── Navbar.jsx           # Barra superior
+│   │   │   │   └── Sidebar.jsx          # Navegación en 2 módulos
+│   │   │   ├── ui/                      # Componentes reutilizables
+│   │   │   │   ├── GlassInput.jsx
+│   │   │   │   ├── GlassModal.jsx
+│   │   │   │   └── GlassSelect.jsx
+│   │   │   └── PlaceholderPage.jsx
+│   │   ├── context/
+│   │   │   ├── AuthContext.jsx
+│   │   │   └── ToastContext.jsx
+│   │   ├── hooks/
+│   │   │   ├── useAuth.js
+│   │   │   └── useToast.js
+│   │   ├── pages/                       # Vistas principales por módulo
+│   │   │   ├── areas/
+│   │   │   │   └── AreasPage.jsx
 │   │   │   ├── auth/
 │   │   │   │   └── Login.jsx
 │   │   │   ├── dashboard/
 │   │   │   │   └── Dashboard.jsx
-│   │   │   ├── ordenes/                 # Nihaht: CU43, CU44
 │   │   │   ├── delivery/                # Danilo: CU9, CU10, CU12
-│   │   │   ├── inventario/              # Sandro: CU5
-│   │   │   ├── equipos/                 # Nihaht: CU45 (parte)
-│   │   │   ├── pagos/                   # Danilo: CU11
+│   │   │   │   ├── ChatClientePage.jsx
+│   │   │   │   └── DeliveryPage.jsx
 │   │   │   ├── empleados/               # Rocket
+│   │   │   │   └── EmpleadosPage.jsx
+│   │   │   ├── equipos/                 # Nihaht: CU45 (parte)
+│   │   │   │   └── EquiposPage.jsx
 │   │   │   ├── horarios/                # Rocket
-│   │   │   ├── tareas/                  # Rocket
-│   │   │   ├── areas/                   # Rocket
+│   │   │   │   └── HorariosPage.jsx
 │   │   │   ├── incidencias/             # Ambos equipos
+│   │   │   │   └── IncidenciasPage.jsx
+│   │   │   ├── inventario/              # Sandro: CU5
+│   │   │   │   ├── InventarioPage.jsx
+│   │   │   │   └── SolicitudesPage.jsx
+│   │   │   ├── mantenimiento/
+│   │   │   │   └── MantenimientoPage.jsx
+│   │   │   ├── ordenes/                 # Nihaht: CU43, CU44
+│   │   │   │   ├── ColaProduccionPage.jsx
+│   │   │   │   └── OrdenesPage.jsx
+│   │   │   ├── pagos/                   # Danilo: CU11
+│   │   │   │   └── PagosPage.jsx
+│   │   │   ├── tareas/                  # Rocket
+│   │   │   │   └── TareasPage.jsx
 │   │   │   └── NotFound.jsx
-│   │   ├── context/
-│   │   │   └── AuthContext.jsx
-│   │   ├── services/
-│   │   │   └── api.js                   # Axios config
-│   │   ├── hooks/
-│   │   │   └── useAuth.js
 │   │   ├── router/
 │   │   │   ├── AppRouter.jsx
 │   │   │   └── PrivateRoute.jsx
+│   │   ├── services/
+│   │   │   └── api.js                   # Axios config
 │   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── index.css                    # Tailwind
+│   │   ├── index.css                    # Tailwind
+│   │   └── main.jsx
+│   ├── .gitignore
+│   ├── eslint.config.js
 │   ├── index.html
-│   ├── vite.config.js
-│   └── package.json
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── README.md
+│   └── vite.config.js
 │
 ├── server/                              # Backend — Express + pg
 │   ├── config/
 │   │   └── db.js                        # pg Pool → Supabase
-│   ├── models/                          # Queries SQL por tabla
-│   │   ├── empleado.js
-│   │   ├── pedido.js
-│   │   ├── historialPedido.js
-│   │   ├── itemsPedido.js
-│   │   ├── ingredientesItem.js
-│   │   ├── inventario.js
-│   │   ├── solicitudAbastecimiento.js
-│   │   ├── equipo.js
-│   │   ├── mantenimiento.js
-│   │   ├── mensajeCliente.js
-│   │   ├── pago.js
-│   │   ├── horarioAsistencia.js
-│   │   ├── area.js
-│   │   ├── tarea.js
-│   │   └── incidencia.js
 │   ├── controllers/                     # Lógica de negocio
-│   ├── routes/                          # Endpoints REST
+│   │   ├── authController.js
+│   │   ├── equipoController.js
+│   │   ├── inventarioController.js
+│   │   └── mantenimientoController.js
 │   ├── middleware/
 │   │   ├── auth.js                      # JWT verify
-│   │   ├── roleGuard.js                 # Autorización por rol
-│   │   └── errorHandler.js              # Errores centralizados
+│   │   ├── errorHandler.js              # Errores centralizados
+│   │   └── roleGuard.js                 # Autorización por rol
+│   ├── routes/                          # Endpoints REST
+│   │   ├── authRoutes.js
+│   │   ├── equipoRoutes.js
+│   │   ├── inventarioRoutes.js
+│   │   └── mantenimientoRoutes.js
 │   ├── utils/
 │   │   └── jwt.js                       # sign / verify
-│   ├── seeds/
 │   ├── app.js
-│   └── server.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── server.js
+│   └── test-db.js
 │
-├── database/
-│   └── migrations/
-│       └── 00001_esquema_inicial.sql    # DDL completo del sistema (16 tablas)
-│
+├── .env
 ├── .env.example
 ├── .gitignore
-├── GUIA_SUPABASE_DANILO.md              # Guía paso a paso para Danilo
 ├── GUIA_FRONTEND_SANDRO.md              # Guía paso a paso para Sandro
-├── README.md
-└── package.json                         # Raíz con concurrently
+├── GUIA_SUPABASE_DANILO.md              # Guía paso a paso para Danilo
+├── package.json                         # Raíz con concurrently
+└── README.md
 ```
 
 ---

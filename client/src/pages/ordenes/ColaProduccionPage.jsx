@@ -12,7 +12,7 @@ const ESTADO_CONFIG = {
   PENDIENTE:        { label: 'Pendiente',      cls: 'bg-yellow-500 text-white', borde: 'border-yellow-400' },
   EN_PREPARACION:   { label: 'Preparando',     cls: 'bg-blue-500 text-white', borde: 'border-blue-400' },
   RETRASADO:        { label: 'RETRASADO',      cls: 'bg-red-600 text-white', borde: 'border-red-500' },
-  TERMINADO:        { label: 'Terminado',      cls: 'bg-green-500 text-white', borde: 'border-green-400' },
+  TERMINADO:        { label: 'Terminado',          cls: 'bg-green-500 text-white', borde: 'border-green-400' },
   CANCELADO:        { label: 'Cancelado',      cls: 'bg-gray-400 text-white', borde: 'border-gray-300' }
 }
 

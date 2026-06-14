@@ -4,9 +4,9 @@
   "description": "Backend API for DeliverThePeople",
   "main": "server.js",
   "scripts": {
-    "dev": "bun --watch server.js",
-    "start": "bun server.js",
-    "seed": "bun seeds/index.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "seed": "node seeds/index.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -16,5 +16,8 @@
     "express-rate-limit": "^8.5.2",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }

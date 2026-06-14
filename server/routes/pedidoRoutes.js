@@ -12,5 +12,6 @@ router.post('/', roleGuard('admin', 'gerente', 'cocinero'), pedidoController.cre
 router.post('/:id/tomar', roleGuard('admin', 'gerente', 'cocinero'), pedidoController.tomarPedido);
 router.patch('/:id/terminar', roleGuard('admin', 'gerente', 'cocinero'), pedidoController.terminarPedido);
 router.patch('/:id/cancelar', roleGuard('admin', 'gerente', 'cocinero'), pedidoController.cancelarPedido);
+router.patch('/:id/entregar', roleGuard('admin', 'gerente', 'despachador'), pedidoController.entregarPedido);
 
 module.exports = router;

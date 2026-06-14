@@ -213,6 +213,47 @@ async function terminarPedido(req, res, next) {
   }
 }
 
+// ── PATCH: Entregar pedido — TERMINADO → ENTREGADO (CU50) ──
+async function entregarPedido(req, res, next) {
+  const client = await pool.connect();
+  try {
+    const { id } = req.params;
+    const despachadorId = req.user.id;
+
+    await client.query('BEGIN');
+
+    const pedidoRes = await client.query(
+      `SELECT * FROM pedidos WHERE id = $1 FOR UPDATE`,
+      [id]
+    );
+    if (pedidoRes.rows.length === 0) throw new Error('Pedido no encontrado.');
+    if (pedidoRes.rows[0].estado !== 'TERMINADO') {
+      throw new Error('Solo se puede entregar un pedido en estado TERMINADO.');
+    }
+
+    const updated = await client.query(
+      `UPDATE pedidos 
+       SET estado = 'ENTREGADO', updated_at = now() 
+       WHERE id = $1 RETURNING *`,
+      [id]
+    );
+
+    await client.query(
+      `INSERT INTO historial_pedido (pedido_id, empleado_id, estado_anterior, estado_nuevo, created_at)
+       VALUES ($1, $2, 'TERMINADO', 'ENTREGADO', now())`,
+      [id, despachadorId]
+    );
+
+    await client.query('COMMIT');
+    res.json({ pedido: updated.rows[0] });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(400).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+}
+
 // ── PATCH: Cancelar pedido — ANY → CANCELADO ──
 async function cancelarPedido(req, res, next) {
   const client = await pool.connect();
@@ -261,5 +302,6 @@ module.exports = {
   crearPedido,
   tomarPedido,
   terminarPedido,
+  entregarPedido,
   cancelarPedido
 };

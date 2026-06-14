@@ -95,7 +95,7 @@ export default function IncidenciasPage() {
       ])
       setIncidencias(resInc.data.incidencias || [])
       // Solo pedidos activos para vinculación
-      setPedidos((resPed.data.pedidos || []).filter(p => p.estado !== 'TERMINADO' && p.estado !== 'CANCELADO'))
+      setPedidos((resPed.data.pedidos || []).filter(p => p.estado !== 'TERMINADO' && p.estado !== 'ENTREGADO' && p.estado !== 'CANCELADO'))
       const productos = resInv.data.productos || []
       setIngredientes(productos)
       setError(null)

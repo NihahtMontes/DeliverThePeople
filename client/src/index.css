@@ -2,15 +2,13 @@
 
 /* ===== SCROLLBAR MODERNO Y MINIMALISTA ===== */
 
-/* Estilos para Firefox */
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
 }
 
-/* Estilos Webkit (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {
-  width: 14px; /* Ancho del área interactiva */
+  width: 14px;
   height: 14px;
 }
 
@@ -18,23 +16,18 @@
   background: transparent;
 }
 
-/* Estado normal: línea delgada */
 ::-webkit-scrollbar-thumb {
   background-color: rgba(156, 163, 175, 0.4);
   border-radius: 10px;
-  /* El borde transparente reduce el ancho visual de la barra (14px - 4px - 4px = 6px) */
   border: 4px solid transparent;
   background-clip: padding-box;
 }
 
-/* Estado hover: barra más gruesa */
 ::-webkit-scrollbar-thumb:hover {
   background-color: rgba(107, 114, 128, 0.7);
-  /* Reducimos el borde para que la barra se ensanche visualmente */
   border: 2px solid transparent;
 }
 
-/* Adaptación especial para el Sidebar (fondo oscuro) */
 aside ::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.15);
 }
@@ -43,30 +36,98 @@ aside ::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.35);
 }
 
-/* Animación de Orbes Flotantes */
+/* ===== ANIMACIONES DE ORBES — MOVIMIENTO CRUZADO NOTORIO ===== */
+
+/* Naranja: empieza arriba-derecha, viaja abajo-izquierda */
+@keyframes orb-orange {
+  0%   { transform: translate(0px, 0px); }
+  100% { transform: translate(-800px, 500px); }
+}
+
+/* Indigo: empieza abajo-izquierda, viaja arriba-derecha */
+@keyframes orb-indigo {
+  0%   { transform: translate(0px, 0px); }
+  100% { transform: translate(750px, -600px); }
+}
+
+/* Teal: empieza centro, viaja abajo-derecha */
+@keyframes orb-teal {
+  0%   { transform: translate(0px, 0px); }
+  100% { transform: translate(500px, 400px); }
+}
+
+/* Azul: empieza abajo-derecha, viaja arriba-izquierda */
+@keyframes orb-blue {
+  0%   { transform: translate(0px, 0px); }
+  100% { transform: translate(-650px, -500px); }
+}
+
+/* Rosa: empieza centro-arriba, viaja abajo-izquierda */
+@keyframes orb-rose {
+  0%   { transform: translate(0px, 0px); }
+  100% { transform: translate(-400px, 550px); }
+}
+
+/* Violeta (pilar sidebar): pulso sutil de escala */
+@keyframes orb-violet {
+  0%   { opacity: 0.45; transform: scaleX(1); }
+  100% { opacity: 0.65; transform: scaleX(1.25); }
+}
+
+.orb-a { animation: orb-orange 10s infinite alternate ease-in-out; }
+.orb-b { animation: orb-indigo 13s infinite alternate ease-in-out; }
+.orb-c { animation: orb-teal   9s  infinite alternate ease-in-out; }
+.orb-d { animation: orb-blue   12s infinite alternate ease-in-out; }
+.orb-e { animation: orb-rose   11s infinite alternate ease-in-out; }
+.orb-violet { animation: orb-violet 7s infinite alternate ease-in-out; }
+
+/* Compatibilidad con clases antiguas */
 @keyframes float-blob {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(500px, -400px) scale(1.5); }
-  66% { transform: translate(-400px, 500px) scale(0.5); }
-  100% { transform: translate(0px, 0px) scale(1); }
+  0%   { transform: translate(0px, 0px) scale(1); }
+  100% { transform: translate(500px, -400px) scale(1.4); }
 }
-
-.animate-blob {
-  animation: float-blob 6s infinite alternate ease-in-out;
-}
-
-/* Animación de Orbes Sutiles (Página Principal) */
 @keyframes float-blob-subtle {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(400px, -250px) scale(1.3); }
-  66% { transform: translate(-300px, 400px) scale(0.7); }
-  100% { transform: translate(0px, 0px) scale(1); }
+  0%   { transform: translate(0px, 0px) scale(1); }
+  100% { transform: translate(-400px, 350px) scale(0.8); }
+}
+.animate-blob        { animation: float-blob        7s infinite alternate ease-in-out; }
+.animate-blob-subtle { animation: float-blob-subtle  9s infinite alternate ease-in-out; }
+
+.animation-delay-2000 { animation-delay: -2s; }
+.animation-delay-4000 { animation-delay: -5s; }
+.animation-delay-6000 { animation-delay: -8s; }
+.animation-delay-8000 { animation-delay: -3s; }
+
+/* ===== GLASSMORPHISM PREMIUM ===== */
+
+.glass {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 8px 32px rgba(31, 38, 135, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-.animate-blob-subtle {
-  animation: float-blob-subtle 8s infinite alternate ease-in-out;
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 4px 24px rgba(31, 38, 135, 0.10),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  border-radius: 1.25rem;
 }
 
-.animation-delay-2000 { animation-delay: 2s; }
-.animation-delay-4000 { animation-delay: 4s; }
-.animation-delay-6000 { animation-delay: 6s; }
+.glass-modal {
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.80);
+  box-shadow:
+    0 20px 60px rgba(31, 38, 135, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}

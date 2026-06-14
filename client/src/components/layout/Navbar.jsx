@@ -8,7 +8,7 @@ export default function Navbar() {
     const [isBranchOpen, setIsBranchOpen] = useState(false)
     const [selectedBranch, setSelectedBranch] = useState("Sucursal Cochabamba Centro")
     return (
-        <nav className="bg-white/40 backdrop-blur-xl border-b border-white/60 px-6 h-16 shrink-0 flex items-center justify-between shadow-sm z-20">
+        <nav className="backdrop-blur-xl border-b border-white/30 px-6 h-16 shrink-0 flex items-center justify-between shadow-sm z-20" style={{ background: 'rgba(255,255,255,0.15)' }}>
             <div className="flex items-center gap-2 font-bold text-xl text-orange-600">
                 <img src={logoDTP} alt="DeliverThePeople Logo" className="h-12 w-auto object-contain" />
                 DeliverThePeople

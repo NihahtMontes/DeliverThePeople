@@ -15,11 +15,17 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 
+const mantenimientoRoutes = require('./routes/mantenimientoRoutes');
+const inventarioRoutes = require('./routes/inventarioRoutes');
+
+
 // TODO: Registrar más rutas aquí a medida que se implementen
 // app.use('/api/empleados', empleadoRoutes);
 // app.use('/api/pedidos', pedidoRoutes);
-// app.use('/api/inventario', inventarioRoutes);
+app.use('/api/inventario', inventarioRoutes);
+
 app.use('/api/equipos', equipoRoutes);
+app.use('/api/mantenimientos', mantenimientoRoutes);
 // app.use('/api/tareas', tareaRoutes);
 // app.use('/api/incidencias', incidenciaRoutes);
 // app.use('/api/horarios-asistencias', horarioAsistenciaRoutes);

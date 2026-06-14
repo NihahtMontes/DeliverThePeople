@@ -31,7 +31,13 @@ export default function Sidebar() {
                 { name: 'Áreas', path: '/areas', icon: MapPin },
             ]
         },
-        { title: 'Soporte', items: [{ name: 'Incidencias', path: '/incidencias', icon: AlertTriangle }] }
+        { 
+            title: 'Soporte', 
+            items: [
+                { name: 'Incidencias', path: '/incidencias', icon: AlertTriangle },
+                { name: 'Mantenimiento', path: '/mantenimientos', icon: Wrench }
+            ] 
+        }
     ]
 
     return (

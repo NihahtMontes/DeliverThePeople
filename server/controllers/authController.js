@@ -11,7 +11,7 @@ async function login(req, res, next) {
     }
 
     const result = await pool.query(
-      'SELECT id, email, nombre, apellido, rol, sucursal_id, estado FROM empleados WHERE email = $1',
+      'SELECT id, email, nombre, apellido, rol, sucursal_id, estado, password_hash FROM empleados WHERE email = $1',
       [email]
     );
 
@@ -25,20 +25,13 @@ async function login(req, res, next) {
       return res.status(403).json({ error: 'Cuenta desactivada. Contacte al administrador.' });
     }
 
-    // En MVP, usamos bcrypt. Luego migramos a Supabase Auth.
-    const passwordResult = await pool.query(
-      'SELECT auth_id FROM empleados WHERE id = $1',
-      [empleado.id]
-    );
+    if (!empleado.password_hash) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
 
-    // Por ahora, comparación simple con bcrypt (seeds usan hash)
-    // Si el empleado tiene auth_id de Supabase, la autenticación es externa
-    const isPasswordValid = await bcrypt.compare(password, '$2a$10$placeholder_hash_para_desarrollo');
+    const isPasswordValid = await bcrypt.compare(password, empleado.password_hash);
 
-    // En desarrollo, aceptamos cualquier contraseña
-    const devBypass = process.env.NODE_ENV !== 'production';
-
-    if (!devBypass && !isPasswordValid) {
+    if (!isPasswordValid) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 

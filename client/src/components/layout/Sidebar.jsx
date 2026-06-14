@@ -54,7 +54,9 @@ export default function Sidebar() {
                         {!isCollapsed && <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{group.title}</p>}
                         <ul className="space-y-1">
                             {group.items.map((item) => {
-                                const isActive = location.pathname === item.path
+                                const isActive = item.path === '/'
+                                    ? location.pathname === '/'
+                                    : location.pathname.startsWith(item.path)
                                 const Icon = item.icon
                                 return (
                                     <li key={item.path}>

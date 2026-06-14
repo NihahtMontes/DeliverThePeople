@@ -23,7 +23,7 @@ async function getInventario(req, res, next) {
       );
     }
 
-    res.json(result.rows);
+    res.json({ productos: result.rows });
   } catch (err) {
     next(err);
   }

@@ -8,6 +8,11 @@ const mantenimientoRoutes = require('./routes/mantenimientoRoutes');
 const inventarioRoutes = require('./routes/inventarioRoutes');
 const pedidoRoutes = require('./routes/pedidoRoutes');
 const incidenciaRoutes = require('./routes/incidenciaRoutes');
+const empleadoRoutes = require('./routes/empleadoRoutes');
+const horarioRoutes = require('./routes/horarioRoutes');
+const tareaRoutes = require('./routes/tareaRoutes');
+const areaRoutes = require('./routes/areaRoutes');
+const rrhhIncidenciaRoutes = require('./routes/rrhhIncidenciaRoutes');
 
 const app = express();
 
@@ -27,6 +32,11 @@ app.use('/api/inventario', inventarioRoutes);
 app.use('/api/mantenimientos', mantenimientoRoutes);
 app.use('/api/pedidos', pedidoRoutes);
 app.use('/api/incidencias', incidenciaRoutes);
+app.use('/api/empleados', empleadoRoutes);
+app.use('/api/horarios-asistencias', horarioRoutes);
+app.use('/api/tareas', tareaRoutes);
+app.use('/api/areas', areaRoutes);
+app.use('/api/rrhh/incidencias', rrhhIncidenciaRoutes);
 
 app.use(errorHandler);
 

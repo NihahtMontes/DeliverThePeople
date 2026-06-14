@@ -35,9 +35,9 @@ export const router = createBrowserRouter([
             { path: 'pagos', element: <PrivateRoute roles={['admin', 'cajero', 'despachador']}><PagosPage /></PrivateRoute> },
             { path: 'empleados', element: <PrivateRoute roles={['admin', 'gerente']}><EmpleadosPage /></PrivateRoute> },
             { path: 'horarios', element: <PrivateRoute roles={['admin', 'gerente']}><HorariosPage /></PrivateRoute> },
-            { path: 'tareas', element: <PrivateRoute roles={['admin', 'gerente', 'cocinero', 'aseo', 'mantenimiento']}><TareasPage /></PrivateRoute> },
-            { path: 'areas', element: <PrivateRoute roles={['admin', 'gerente', 'aseo']}><AreasPage /></PrivateRoute> },
-            { path: 'incidencias', element: <PrivateRoute roles={['admin', 'gerente', 'cocinero', 'aseo']}><IncidenciasPage /></PrivateRoute> },
+            { path: 'tareas', element: <PrivateRoute roles={['admin', 'gerente', 'cocinero', 'despachador', 'cajero', 'aseo', 'mantenimiento', 'tecnico']}><TareasPage /></PrivateRoute> },
+            { path: 'areas', element: <PrivateRoute roles={['admin', 'gerente', 'aseo', 'mantenimiento', 'tecnico', 'cocinero', 'despachador']}><AreasPage /></PrivateRoute> },
+            { path: 'incidencias', element: <PrivateRoute roles={['admin', 'gerente', 'cocinero', 'despachador', 'cajero', 'aseo', 'mantenimiento', 'tecnico']}><IncidenciasPage /></PrivateRoute> },
             { path: 'mantenimientos', element: <PrivateRoute roles={['admin', 'gerente', 'mantenimiento']}><MantenimientoPage /></PrivateRoute> },
         ]
     },

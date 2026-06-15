@@ -1,14 +1,6 @@
-const { Pool } = require('pg');
 require('dotenv').config({ path: '../.env' });
 
-const pool = new Pool({
-  host: process.env.PGHOST,
-  port: parseInt(process.env.PGPORT) || 6543,
-  database: process.env.PGDATABASE,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  ssl: { rejectUnauthorized: false }
-});
+const { pool } = require('./config/db');
 
 async function getEnums() {
   try {

@@ -185,6 +185,16 @@ async function registrarMarca(req, res, next, campo) {
     const horario = await obtenerHorarioAlcanzable(req, id);
     if (!horario) return res.status(404).json({ ok: false, error: 'Registro de horario no encontrado.' });
 
+    if (campo === 'hora_entrada' && horario.hora_entrada) {
+      return res.status(409).json({ ok: false, error: 'La entrada ya fue registrada. Usa Editar si necesitas corregirla.' });
+    }
+    if (campo === 'hora_salida' && !horario.hora_entrada) {
+      return res.status(400).json({ ok: false, error: 'Debes registrar la entrada antes de registrar la salida.' });
+    }
+    if (campo === 'hora_salida' && horario.hora_salida) {
+      return res.status(409).json({ ok: false, error: 'La salida ya fue registrada. Usa Editar si necesitas corregirla.' });
+    }
+
     const valor = req.body[campo] || new Date().toISOString();
     if (!timestampValido(valor)) return res.status(400).json({ ok: false, error: 'La fecha y hora no son validas.' });
     const entrada = campo === 'hora_entrada' ? valor : horario.hora_entrada;

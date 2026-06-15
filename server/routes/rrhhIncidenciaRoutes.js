@@ -5,7 +5,7 @@ const { roleGuard } = require('../middleware/roleGuard');
 
 const router = express.Router();
 router.use(auth);
-router.get('/', roleGuard('admin', 'gerente'), listarIncidencias);
+router.get('/', listarIncidencias);
 router.post('/', crearIncidencia);
 router.patch('/:id/estado', roleGuard('admin', 'gerente'), actualizarEstado);
 

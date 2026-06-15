@@ -32,14 +32,19 @@ async function listarIncidencias(req, res, next) {
 
     const condiciones = ["i.tipo LIKE 'RRHH_%'"];
     const valores = [];
-    const sucursalAplicada = gerenteConSucursal(req) ? req.user.sucursal_id : sucursalId;
-    if (sucursalAplicada) {
-      valores.push(sucursalAplicada);
-      condiciones.push(`i.sucursal_id = $${valores.length}`);
-    }
-    if (empleadoId) {
-      valores.push(empleadoId);
+    if (!esGestor(req)) {
+      valores.push(req.user.id);
       condiciones.push(`i.empleado_id = $${valores.length}`);
+    } else {
+      const sucursalAplicada = gerenteConSucursal(req) ? req.user.sucursal_id : sucursalId;
+      if (sucursalAplicada) {
+        valores.push(sucursalAplicada);
+        condiciones.push(`i.sucursal_id = $${valores.length}`);
+      }
+      if (empleadoId) {
+        valores.push(empleadoId);
+        condiciones.push(`i.empleado_id = $${valores.length}`);
+      }
     }
     if (estado) {
       valores.push(estado);

@@ -6,18 +6,13 @@ const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 const SELECT_HORARIOS = `
   SELECT h.id, h.empleado_id, TO_CHAR(h.fecha, 'YYYY-MM-DD') AS fecha,
-         h.hora_entrada, h.hora_salida, h.created_at,
+         h.hora_entrada_real, h.hora_salida_real, h.hora_inicio_programada, h.hora_fin_programada,
          e.nombre AS empleado_nombre, e.apellido AS empleado_apellido, e.rol,
          e.sucursal_id, s.nombre AS sucursal_nombre,
+         h.estado,
          CASE
-           WHEN h.hora_entrada IS NOT NULL AND h.hora_salida IS NOT NULL THEN 'COMPLETADO'
-           WHEN h.hora_entrada IS NOT NULL THEN 'EN_CURSO'
-           WHEN h.fecha < CURRENT_DATE THEN 'AUSENTE'
-           ELSE 'PENDIENTE'
-         END AS estado,
-         CASE
-           WHEN h.hora_entrada IS NULL THEN 'SIN_ENTRADA'
-           WHEN (h.hora_entrada AT TIME ZONE 'America/La_Paz')::time > TIME '09:15' THEN 'RETRASO'
+           WHEN h.hora_entrada_real IS NULL THEN 'SIN_ENTRADA'
+           WHEN h.hora_inicio_programada IS NOT NULL AND (h.hora_entrada_real::time) > (h.hora_inicio_programada::time + INTERVAL '15 minutes') THEN 'RETRASO'
            ELSE 'A_TIEMPO'
          END AS puntualidad
   FROM horarios_asistencias h
@@ -58,7 +53,7 @@ async function obtenerEmpleado(empleadoId) {
 async function obtenerHorarioAlcanzable(req, id) {
   const valores = [id];
   let sql = `
-    SELECT h.id, h.empleado_id, h.fecha, h.hora_entrada, h.hora_salida, e.sucursal_id
+    SELECT h.id, h.empleado_id, h.fecha, h.hora_entrada_real, h.hora_salida_real, e.sucursal_id
     FROM horarios_asistencias h
     JOIN empleados e ON e.id = h.empleado_id
     WHERE h.id = $1
@@ -107,7 +102,7 @@ async function listarHorarios(req, res, next) {
 
     const where = condiciones.length ? `WHERE ${condiciones.join(' AND ')}` : '';
     const result = await pool.query(
-      `SELECT * FROM (${SELECT_HORARIOS}) base ${where} ORDER BY base.fecha DESC, base.created_at DESC`,
+      `SELECT * FROM (${SELECT_HORARIOS}) base ${where} ORDER BY base.fecha DESC`,
       valores
     );
     return res.json({ ok: true, horarios: result.rows });
@@ -136,9 +131,9 @@ async function crearHorario(req, res, next) {
     if (duplicado.rows.length) return res.status(409).json({ ok: false, error: 'Ya existe un registro para este empleado en la fecha seleccionada.' });
 
     const insert = await pool.query(
-      `INSERT INTO horarios_asistencias (empleado_id, fecha, hora_entrada, hora_salida, created_at)
-       VALUES ($1, $2, $3, $4, now()) RETURNING id`,
-      [empleadoId, fecha, entrada || null, salida || null]
+      `INSERT INTO horarios_asistencias (empleado_id, fecha, hora_inicio_programada, hora_fin_programada, hora_entrada_real, hora_salida_real, estado)
+       VALUES ($1, $2, $3, $4, $5, $6, 'programado') RETURNING id`,
+      [empleadoId, fecha, entrada || null, salida || null, null, null]
     );
     const result = await pool.query(`${SELECT_HORARIOS} WHERE h.id = $1`, [insert.rows[0].id]);
     return res.status(201).json({ ok: true, horario: result.rows[0] });
@@ -168,7 +163,7 @@ async function actualizarHorario(req, res, next) {
     if (duplicado.rows.length) return res.status(409).json({ ok: false, error: 'Ya existe otro registro para este empleado en la fecha seleccionada.' });
 
     await pool.query(
-      'UPDATE horarios_asistencias SET fecha = $1, hora_entrada = $2, hora_salida = $3 WHERE id = $4',
+      'UPDATE horarios_asistencias SET fecha = $1, hora_inicio_programada = $2, hora_fin_programada = $3 WHERE id = $4',
       [fecha, entrada, salida, id]
     );
     const result = await pool.query(`${SELECT_HORARIOS} WHERE h.id = $1`, [id]);
@@ -185,24 +180,25 @@ async function registrarMarca(req, res, next, campo) {
     const horario = await obtenerHorarioAlcanzable(req, id);
     if (!horario) return res.status(404).json({ ok: false, error: 'Registro de horario no encontrado.' });
 
-    if (campo === 'hora_entrada' && horario.hora_entrada) {
+    const campoReal = campo === 'hora_entrada' ? 'hora_entrada_real' : 'hora_salida_real';
+    if (campo === 'hora_entrada' && horario.hora_entrada_real) {
       return res.status(409).json({ ok: false, error: 'La entrada ya fue registrada. Usa Editar si necesitas corregirla.' });
     }
-    if (campo === 'hora_salida' && !horario.hora_entrada) {
+    if (campo === 'hora_salida' && !horario.hora_entrada_real) {
       return res.status(400).json({ ok: false, error: 'Debes registrar la entrada antes de registrar la salida.' });
     }
-    if (campo === 'hora_salida' && horario.hora_salida) {
+    if (campo === 'hora_salida' && horario.hora_salida_real) {
       return res.status(409).json({ ok: false, error: 'La salida ya fue registrada. Usa Editar si necesitas corregirla.' });
     }
 
     const valor = req.body[campo] || new Date().toISOString();
     if (!timestampValido(valor)) return res.status(400).json({ ok: false, error: 'La fecha y hora no son validas.' });
-    const entrada = campo === 'hora_entrada' ? valor : horario.hora_entrada;
-    const salida = campo === 'hora_salida' ? valor : horario.hora_salida;
+    const entrada = campo === 'hora_entrada' ? valor : horario.hora_entrada_real;
+    const salida = campo === 'hora_salida' ? valor : horario.hora_salida_real;
     const errorHoras = validarHoras(entrada, salida);
     if (errorHoras) return res.status(400).json({ ok: false, error: errorHoras });
 
-    await pool.query(`UPDATE horarios_asistencias SET ${campo} = $1 WHERE id = $2`, [valor, id]);
+    await pool.query(`UPDATE horarios_asistencias SET ${campoReal} = $1 WHERE id = $2`, [valor, id]);
     const result = await pool.query(`${SELECT_HORARIOS} WHERE h.id = $1`, [id]);
     return res.json({ ok: true, horario: result.rows[0] });
   } catch (err) {

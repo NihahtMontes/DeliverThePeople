@@ -1,15 +1,15 @@
 const { pool } = require('../config/db');
 
-const TIPOS = ['RRHH_CONFLICTO', 'RRHH_ACCIDENTE', 'RRHH_ASISTENCIA', 'RRHH_TAREA', 'RRHH_OTRO'];
-const PRIORIDADES = ['BAJA', 'MEDIA', 'ALTA', 'CRITICA'];
-const ESTADOS = ['ABIERTA', 'EN_REVISION', 'CERRADA'];
+const TIPOS = ['accidente_personal', 'conflicto', 'otro'];
+const PRIORIDADES = ['baja', 'media', 'alta', 'critica'];
+const ESTADOS = ['reportado', 'en_revision', 'en_progreso', 'resuelto', 'descartado'];
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SELECT_INCIDENCIAS = `
-  SELECT i.id, i.sucursal_id, i.empleado_id, i.descripcion, i.estado, i.created_at,
-         i.tipo, i.prioridad, e.nombre AS empleado_nombre, e.apellido AS empleado_apellido,
+  SELECT i.id, i.sucursal_id, i.reportado_por, i.descripcion, i.estado, i.fecha_reporte,
+         i.tipo, i.severidad, e.nombre AS empleado_nombre, e.apellido AS empleado_apellido,
          e.email AS empleado_email, e.rol, s.nombre AS sucursal_nombre
   FROM incidencias i
-  JOIN empleados e ON e.id = i.empleado_id
+  JOIN empleados e ON e.id = i.reportado_por
   LEFT JOIN sucursales s ON s.id = i.sucursal_id
 `;
 
@@ -23,18 +23,18 @@ function gerenteConSucursal(req) {
 
 async function listarIncidencias(req, res, next) {
   try {
-    const { sucursal_id: sucursalId, empleado_id: empleadoId, estado, prioridad, tipo } = req.query;
+    const { sucursal_id: sucursalId, empleado_id: empleadoId, estado, severidad, tipo } = req.query;
     if (sucursalId && !UUID_REGEX.test(sucursalId)) return res.status(400).json({ ok: false, error: 'Sucursal no valida.' });
     if (empleadoId && !UUID_REGEX.test(empleadoId)) return res.status(400).json({ ok: false, error: 'Empleado no valido.' });
     if (estado && !ESTADOS.includes(estado)) return res.status(400).json({ ok: false, error: 'Estado no valido.' });
-    if (prioridad && !PRIORIDADES.includes(prioridad)) return res.status(400).json({ ok: false, error: 'Prioridad no valida.' });
+    if (severidad && !PRIORIDADES.includes(severidad)) return res.status(400).json({ ok: false, error: 'Severidad no valida.' });
     if (tipo && !TIPOS.includes(tipo)) return res.status(400).json({ ok: false, error: 'Tipo no valido.' });
 
-    const condiciones = ["i.tipo LIKE 'RRHH_%'"];
+    const condiciones = [];
     const valores = [];
     if (!esGestor(req)) {
       valores.push(req.user.id);
-      condiciones.push(`i.empleado_id = $${valores.length}`);
+      condiciones.push(`i.reportado_por = $${valores.length}`);
     } else {
       const sucursalAplicada = gerenteConSucursal(req) ? req.user.sucursal_id : sucursalId;
       if (sucursalAplicada) {
@@ -43,23 +43,24 @@ async function listarIncidencias(req, res, next) {
       }
       if (empleadoId) {
         valores.push(empleadoId);
-        condiciones.push(`i.empleado_id = $${valores.length}`);
+        condiciones.push(`i.reportado_por = $${valores.length}`);
       }
     }
     if (estado) {
       valores.push(estado);
       condiciones.push(`i.estado = $${valores.length}`);
     }
-    if (prioridad) {
-      valores.push(prioridad);
-      condiciones.push(`i.prioridad = $${valores.length}`);
+    if (severidad) {
+      valores.push(severidad);
+      condiciones.push(`i.severidad = $${valores.length}`);
     }
     if (tipo) {
       valores.push(tipo);
       condiciones.push(`i.tipo = $${valores.length}`);
     }
+    const where = condiciones.length ? `WHERE ${condiciones.join(' AND ')}` : '';
     const result = await pool.query(
-      `${SELECT_INCIDENCIAS} WHERE ${condiciones.join(' AND ')} ORDER BY i.created_at DESC`,
+      `${SELECT_INCIDENCIAS} ${where} ORDER BY i.fecha_reporte DESC`,
       valores
     );
     return res.json({ ok: true, incidencias: result.rows });
@@ -72,10 +73,10 @@ async function crearIncidencia(req, res, next) {
   try {
     const descripcion = typeof req.body.descripcion === 'string' ? req.body.descripcion.trim() : '';
     const tipo = req.body.tipo;
-    const prioridad = req.body.prioridad || 'ALTA';
+    const severidad = req.body.severidad || 'media';
     if (!descripcion) return res.status(400).json({ ok: false, error: 'La descripcion es obligatoria.' });
-    if (!TIPOS.includes(tipo)) return res.status(400).json({ ok: false, error: 'Tipo de incidencia RRHH no valido.' });
-    if (!PRIORIDADES.includes(prioridad)) return res.status(400).json({ ok: false, error: 'Prioridad no valida.' });
+    if (!TIPOS.includes(tipo)) return res.status(400).json({ ok: false, error: 'Tipo de incidencia no valido.' });
+    if (!PRIORIDADES.includes(severidad)) return res.status(400).json({ ok: false, error: 'Severidad no valida.' });
 
     const empleadoId = esGestor(req) ? (req.body.empleado_id || req.user.id) : req.user.id;
     if (!UUID_REGEX.test(empleadoId)) return res.status(400).json({ ok: false, error: 'Empleado no valido.' });
@@ -94,9 +95,9 @@ async function crearIncidencia(req, res, next) {
 
     const insert = await pool.query(
       `INSERT INTO incidencias
-        (sucursal_id, empleado_id, descripcion, estado, tipo, prioridad, pedido_id, ingrediente_faltante, ingrediente_alternativo, created_at)
-       VALUES ($1, $2, $3, 'ABIERTA', $4, $5, NULL, NULL, NULL, now()) RETURNING id`,
-      [sucursalId, empleadoId, descripcion, tipo, prioridad]
+        (sucursal_id, reportado_por, tipo, titulo, descripcion, severidad, estado, fecha_reporte)
+       VALUES ($1, $2, $3, $4, $5, $6, 'reportado', now()) RETURNING id`,
+      [sucursalId, empleadoId, tipo, descripcion.substring(0, 50), descripcion, severidad]
     );
     const result = await pool.query(`${SELECT_INCIDENCIAS} WHERE i.id = $1`, [insert.rows[0].id]);
     return res.status(201).json({ ok: true, incidencia: result.rows[0] });
@@ -112,14 +113,14 @@ async function actualizarEstado(req, res, next) {
     if (!UUID_REGEX.test(id)) return res.status(400).json({ ok: false, error: 'Incidencia no valida.' });
     if (!ESTADOS.includes(estado)) return res.status(400).json({ ok: false, error: 'Estado no valido.' });
     const valores = [id];
-    let sql = "SELECT id FROM incidencias WHERE id = $1 AND tipo LIKE 'RRHH_%'";
+    let sql = "SELECT id FROM incidencias WHERE id = $1";
     if (gerenteConSucursal(req)) {
       valores.push(req.user.sucursal_id);
       sql += ` AND sucursal_id = $${valores.length}`;
     }
     const actual = await pool.query(sql, valores);
-    if (!actual.rows.length) return res.status(404).json({ ok: false, error: 'Incidencia RRHH no encontrada.' });
-    await pool.query('UPDATE incidencias SET estado = $1 WHERE id = $2', [estado, id]);
+    if (!actual.rows.length) return res.status(404).json({ ok: false, error: 'Incidencia no encontrada.' });
+    await pool.query("UPDATE incidencias SET estado = $1, fecha_resolucion = CASE WHEN $1 = 'resuelto' THEN now() ELSE NULL END WHERE id = $2", [estado, id]);
     const result = await pool.query(`${SELECT_INCIDENCIAS} WHERE i.id = $1`, [id]);
     return res.json({ ok: true, incidencia: result.rows[0] });
   } catch (err) {

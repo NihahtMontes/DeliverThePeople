@@ -10,9 +10,8 @@ async function getPagos(req, res, next) {
       SELECT p.*,
              e.nombre AS registrado_por_nombre,
              e.apellido AS registrado_por_apellido,
-             ped.numero_orden,
-             ped.mesa,
-             ped.total AS pedido_total,
+             ped.numero_pedido,
+             ped.nombre_cliente,
              ped.estado AS pedido_estado
       FROM pagos p
       LEFT JOIN empleados e ON p.registrado_por = e.id
@@ -21,10 +20,10 @@ async function getPagos(req, res, next) {
 
     let result;
     if (rol === 'admin' || rol === 'administrador' || !sucursalId) {
-      result = await pool.query(baseSql + ` ORDER BY p.created_at DESC`);
+      result = await pool.query(baseSql + ` ORDER BY p.fecha_pago DESC`);
     } else {
       result = await pool.query(
-        baseSql + ` WHERE ped.sucursal_id = $1 ORDER BY p.created_at DESC`,
+        baseSql + ` WHERE ped.sucursal_id = $1 ORDER BY p.fecha_pago DESC`,
         [sucursalId]
       );
     }
@@ -44,7 +43,7 @@ async function getPagosByPedido(req, res, next) {
        FROM pagos p
        LEFT JOIN empleados e ON p.registrado_por = e.id
        WHERE p.pedido_id = $1
-       ORDER BY p.created_at DESC`,
+       ORDER BY p.fecha_pago DESC`,
       [pedido_id]
     );
     res.json({ pagos: result.rows });
@@ -77,13 +76,13 @@ async function registrarPago(req, res, next) {
     const pedido = pedidoRes.rows[0];
 
     // Verificar que el pedido no esté cancelado
-    if (pedido.estado === 'CANCELADO') {
+    if (pedido.estado === 'cancelado') {
       throw new Error('No se puede registrar pago para un pedido cancelado.');
     }
 
     const result = await client.query(
-      `INSERT INTO pagos (pedido_id, monto, metodo, estado, registrado_por, created_at, updated_at)
-       VALUES ($1, $2, $3, 'completado', $4, now(), now()) RETURNING *`,
+      `INSERT INTO pagos (pedido_id, monto, metodo, registrado_por, fecha_pago)
+       VALUES ($1, $2, $3, $4, now()) RETURNING *`,
       [pedido_id, monto, metodo || 'efectivo', registradoPor]
     );
 

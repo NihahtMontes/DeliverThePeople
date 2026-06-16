@@ -9,29 +9,29 @@ async function getPedidos(req, res, next) {
     let result;
     const baseSql = `
       SELECT p.*,
-             e.nombre AS cocinero_nombre,
+             c.nombre AS cocinero_nombre,
+             c.apellido AS cocinero_apellido,
+             d.nombre AS despachador_nombre,
+             d.apellido AS despachador_apellido,
              COALESCE(
                (SELECT json_agg(json_build_object(
                  'id', ip.id,
-                 'item_id', ip.item_id,
-                 'nombre', inv.nombre,
-                 'categoria', inv.categoria,
+                 'nombre', ip.nombre,
                  'cantidad', ip.cantidad,
-                 'precio_unitario', ip.precio_unitario,
-                 'subtotal', ip.subtotal
+                 'notas', ip.notas
                ))
                FROM items_pedido ip
-               LEFT JOIN inventario inv ON ip.item_id = inv.id
                WHERE ip.pedido_id = p.id
                ), '[]'::json) AS items
       FROM pedidos p
-      LEFT JOIN empleados e ON p.empleado_id = e.id
+      LEFT JOIN empleados c ON p.cocinero_asignado_id = c.id
+      LEFT JOIN empleados d ON p.despachador_asignado_id = d.id
     `;
 
     if (rol === 'admin' || rol === 'administrador' || !sucursalId) {
-      result = await pool.query(baseSql + ` ORDER BY p.created_at DESC`);
+      result = await pool.query(baseSql + ` ORDER BY p.fecha_creacion DESC`);
     } else {
-      result = await pool.query(baseSql + ` WHERE p.sucursal_id = $1 ORDER BY p.created_at DESC`, [sucursalId]);
+      result = await pool.query(baseSql + ` WHERE p.sucursal_id = $1 ORDER BY p.fecha_creacion DESC`, [sucursalId]);
     }
 
     res.json({ pedidos: result.rows });
@@ -45,33 +45,28 @@ async function getColaProduccion(req, res, next) {
   try {
     const sucursalId = req.user.sucursal_id;
     const rol = req.user.rol;
-    const { ingrediente_id, tiempo_minutos, estado } = req.query;
+    const { estado } = req.query;
 
-    const estadosCola = estado ? [estado] : ['PENDIENTE', 'EN_PREPARACION'];
+    const estadosCola = estado ? [estado] : ['pendiente', 'en_preparacion'];
     const params = [];
     let paramIndex = 0;
 
     let sql = `
       SELECT DISTINCT p.*,
-             e.nombre AS cocinero_nombre,
+             c.nombre AS cocinero_nombre,
+             c.apellido AS cocinero_apellido,
              COALESCE(
                (SELECT jsonb_agg(jsonb_build_object(
                  'id', ip.id,
-                 'item_id', ip.item_id,
-                 'nombre', inv.nombre,
-                 'categoria', inv.categoria,
+                 'nombre', ip.nombre,
                  'cantidad', ip.cantidad,
-                 'precio_unitario', ip.precio_unitario,
-                 'subtotal', ip.subtotal
+                 'notas', ip.notas
                ))
                FROM items_pedido ip
-               LEFT JOIN inventario inv ON ip.item_id = inv.id
                WHERE ip.pedido_id = p.id
                ), '[]'::jsonb) AS items
       FROM pedidos p
-      LEFT JOIN empleados e ON p.empleado_id = e.id
-      LEFT JOIN items_pedido ip ON p.id = ip.pedido_id
-      LEFT JOIN ingredientes_item ii ON ip.item_id = ii.item_id
+      LEFT JOIN empleados c ON p.cocinero_asignado_id = c.id
       WHERE p.estado = ANY($${++paramIndex})
     `;
     params.push(estadosCola);
@@ -81,17 +76,7 @@ async function getColaProduccion(req, res, next) {
       params.push(sucursalId);
     }
 
-    if (ingrediente_id) {
-      sql += ` AND ii.ingrediente_id = $${++paramIndex}`;
-      params.push(ingrediente_id);
-    }
-
-    if (tiempo_minutos) {
-      sql += ` AND p.created_at <= NOW() - ($${++paramIndex} || ' minutes')::INTERVAL`;
-      params.push(parseInt(tiempo_minutos));
-    }
-
-    sql += ` ORDER BY p.created_at ASC`;
+    sql += ` ORDER BY p.fecha_creacion ASC`;
 
     const result = await pool.query(sql, params);
     res.json({ pedidos: result.rows });
@@ -105,23 +90,23 @@ async function crearPedido(req, res, next) {
   try {
     const sucursalId = req.user.sucursal_id;
     const empleadoId = req.user.id;
-    const { total, mesa } = req.body;
+    const { numero_pedido, nombre_cliente, telefono_cliente, direccion_cliente, notas } = req.body;
 
-    if (total === undefined || total === null) {
-      return res.status(400).json({ error: 'El total es obligatorio.' });
+    if (!numero_pedido || !nombre_cliente) {
+      return res.status(400).json({ error: 'numero_pedido y nombre_cliente son obligatorios.' });
     }
 
     const result = await pool.query(
-      `INSERT INTO pedidos (sucursal_id, empleado_id, estado, total, mesa, created_at, updated_at)
-       VALUES ($1, $2, 'PENDIENTE', $3, $4, now(), now()) RETURNING *`,
-      [sucursalId, empleadoId, total, mesa || null]
+      `INSERT INTO pedidos (numero_pedido, sucursal_id, nombre_cliente, telefono_cliente, direccion_cliente, estado, notas, fecha_creacion)
+       VALUES ($1, $2, $3, $4, $5, 'pendiente', $6, now()) RETURNING *`,
+      [numero_pedido, sucursalId, nombre_cliente, telefono_cliente || null, direccion_cliente || null, notas || null]
     );
 
     const pedido = result.rows[0];
 
     await pool.query(
-      `INSERT INTO historial_pedido (pedido_id, empleado_id, estado_anterior, estado_nuevo, created_at)
-       VALUES ($1, $2, NULL, 'PENDIENTE', now())`,
+      `INSERT INTO historial_pedido (pedido_id, estado_anterior, estado_nuevo, cambiado_por, fecha_cambio)
+       VALUES ($1, NULL, 'pendiente', $2, now())`,
       [pedido.id, empleadoId]
     );
 
@@ -145,20 +130,20 @@ async function tomarPedido(req, res, next) {
       [id]
     );
     if (pedidoRes.rows.length === 0) throw new Error('Pedido no encontrado.');
-    if (pedidoRes.rows[0].estado !== 'PENDIENTE') {
-      throw new Error('Solo se puede tomar un pedido en estado PENDIENTE.');
+    if (pedidoRes.rows[0].estado !== 'pendiente') {
+      throw new Error('Solo se puede tomar un pedido en estado pendiente.');
     }
 
     const updated = await client.query(
       `UPDATE pedidos 
-       SET estado = 'EN_PREPARACION', empleado_id = $1, updated_at = now() 
+       SET estado = 'en_preparacion', cocinero_asignado_id = $1, fecha_creacion = now() 
        WHERE id = $2 RETURNING *`,
       [cocineroId, id]
     );
 
     await client.query(
-      `INSERT INTO historial_pedido (pedido_id, empleado_id, estado_anterior, estado_nuevo, created_at)
-       VALUES ($1, $2, 'PENDIENTE', 'EN_PREPARACION', now())`,
+      `INSERT INTO historial_pedido (pedido_id, estado_anterior, estado_nuevo, cambiado_por, fecha_cambio)
+       VALUES ($1, 'pendiente', 'en_preparacion', $2, now())`,
       [id, cocineroId]
     );
 
@@ -186,20 +171,20 @@ async function terminarPedido(req, res, next) {
       [id]
     );
     if (pedidoRes.rows.length === 0) throw new Error('Pedido no encontrado.');
-    if (pedidoRes.rows[0].estado !== 'EN_PREPARACION') {
+    if (pedidoRes.rows[0].estado !== 'en_preparacion') {
       throw new Error('El pedido no esta en preparacion.');
     }
 
     const updated = await client.query(
       `UPDATE pedidos 
-       SET estado = 'TERMINADO', updated_at = now() 
+       SET estado = 'terminado', fecha_creacion = now() 
        WHERE id = $1 RETURNING *`,
       [id]
     );
 
     await client.query(
-      `INSERT INTO historial_pedido (pedido_id, empleado_id, estado_anterior, estado_nuevo, created_at)
-       VALUES ($1, $2, 'EN_PREPARACION', 'TERMINADO', now())`,
+      `INSERT INTO historial_pedido (pedido_id, estado_anterior, estado_nuevo, cambiado_por, fecha_cambio)
+       VALUES ($1, 'en_preparacion', 'terminado', $2, now())`,
       [id, cocineroId]
     );
 
@@ -227,20 +212,20 @@ async function entregarPedido(req, res, next) {
       [id]
     );
     if (pedidoRes.rows.length === 0) throw new Error('Pedido no encontrado.');
-    if (pedidoRes.rows[0].estado !== 'TERMINADO') {
-      throw new Error('Solo se puede entregar un pedido en estado TERMINADO.');
+    if (pedidoRes.rows[0].estado !== 'terminado') {
+      throw new Error('Solo se puede entregar un pedido en estado terminado.');
     }
 
     const updated = await client.query(
       `UPDATE pedidos 
-       SET estado = 'ENTREGADO', updated_at = now() 
+       SET estado = 'entregado', tiempo_real_entrega = now(), despachador_asignado_id = $2
        WHERE id = $1 RETURNING *`,
-      [id]
+      [id, despachadorId]
     );
 
     await client.query(
-      `INSERT INTO historial_pedido (pedido_id, empleado_id, estado_anterior, estado_nuevo, created_at)
-       VALUES ($1, $2, 'TERMINADO', 'ENTREGADO', now())`,
+      `INSERT INTO historial_pedido (pedido_id, estado_anterior, estado_nuevo, cambiado_por, fecha_cambio)
+       VALUES ($1, 'terminado', 'entregado', $2, now())`,
       [id, despachadorId]
     );
 
@@ -269,21 +254,21 @@ async function cancelarPedido(req, res, next) {
       [id]
     );
     if (pedidoRes.rows.length === 0) throw new Error('Pedido no encontrado.');
-    if (['CANCELADO', 'ENTREGADO'].includes(pedidoRes.rows[0].estado)) {
+    if (['cancelado', 'entregado'].includes(pedidoRes.rows[0].estado)) {
       throw new Error(`No se puede cancelar un pedido en estado ${pedidoRes.rows[0].estado}.`);
     }
 
     const estadoAnterior = pedidoRes.rows[0].estado;
 
     const updated = await client.query(
-      `UPDATE pedidos SET estado = 'CANCELADO', updated_at = now() WHERE id = $1 RETURNING *`,
-      [id]
+      `UPDATE pedidos SET estado = 'cancelado', motivo_cancelacion = $2, fecha_creacion = now() WHERE id = $1 RETURNING *`,
+      [id, motivo || null]
     );
 
     await client.query(
-      `INSERT INTO historial_pedido (pedido_id, empleado_id, estado_anterior, estado_nuevo, created_at)
-       VALUES ($1, $2, $3, 'CANCELADO', now())`,
-      [id, empleadoId, estadoAnterior]
+      `INSERT INTO historial_pedido (pedido_id, estado_anterior, estado_nuevo, cambiado_por, fecha_cambio)
+       VALUES ($1, $2, 'cancelado', $3, now())`,
+      [id, estadoAnterior, empleadoId]
     );
 
     await client.query('COMMIT');

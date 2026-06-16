@@ -9,8 +9,8 @@ async function getMensajes(req, res, next) {
 
     const baseSql = `
       SELECT m.*,
-             p.numero_orden,
-             p.mesa
+             p.numero_pedido,
+             p.nombre_cliente
       FROM mensajes_cliente m
       LEFT JOIN pedidos p ON m.pedido_id = p.id
     `;

@@ -10,8 +10,8 @@ async function getPagos(req, res, next) {
       SELECT p.*,
              e.nombre AS registrado_por_nombre,
              e.apellido AS registrado_por_apellido,
-             ped.numero_orden,
-             ped.mesa,
+             ped.numero_pedido,
+             ped.nombre_cliente,
              ped.total AS pedido_total,
              ped.estado AS pedido_estado
       FROM pagos p

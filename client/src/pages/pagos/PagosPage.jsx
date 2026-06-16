@@ -91,7 +91,7 @@ export default function PagosPage() {
   }
 
   const pagosFiltrados = pagos.filter(p => {
-    const texto = `${p.numero_orden} ${p.metodo} ${p.registrado_por_nombre}`.toLowerCase()
+    const texto = `${p.numero_pedido} ${p.metodo} ${p.registrado_por_nombre}`.toLowerCase()
     return busqueda ? texto.includes(busqueda.toLowerCase()) : true
   })
 
@@ -172,7 +172,7 @@ export default function PagosPage() {
                   return (
                     <tr key={p.id} className="border-b border-gray-50 hover:bg-green-50/20 transition-colors">
                       <td className="p-4">
-                        <div className="font-bold text-gray-800">#{p.numero_orden}</div>
+                        <div className="font-bold text-gray-800">#{p.numero_pedido}</div>
                         <div className="text-xs text-gray-500">Mesa: {p.mesa || '—'}</div>
                       </td>
                       <td className="p-4 font-bold text-gray-900">Bs. {Number(p.monto).toFixed(2)}</td>
@@ -223,7 +223,7 @@ export default function PagosPage() {
               <option value="" disabled>Selecciona un pedido...</option>
               {pedidos.map(p => (
                 <option key={p.id} value={p.id}>
-                  #{p.numero_orden || p.id} — Mesa {p.mesa || '—'} — Total Bs. {Number(p.total || 0).toFixed(2)}
+                  #{p.numero_pedido || p.id} — {p.nombre_cliente || '—'} — Total Bs. {Number(p.total || 0).toFixed(2)}
                 </option>
               ))}
             </select>

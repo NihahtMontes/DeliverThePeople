@@ -142,7 +142,7 @@ export default function OrdenesPage() {
 
   // ── Filtrado ──
   const pedidosFiltrados = pedidos.filter(p => {
-    const texto = `${p.numero_orden} ${p.mesa} ${p.items?.map(i => i.nombre).join(' ')}`.toLowerCase()
+    const texto = `${p.numero_pedido} ${p.nombre_cliente} ${p.items?.map(i => i.nombre).join(' ')}`.toLowerCase()
     const coincideBusqueda = busqueda ? texto.includes(busqueda.toLowerCase()) : true
     const coincideEstado = filtroEstado ? p.estado === filtroEstado : true
     // Ver historial: mostrar terminados + cancelados. Si no, mostrar solo activos
@@ -270,7 +270,7 @@ export default function OrdenesPage() {
                     <td className="p-4">
                       <div className="font-bold text-gray-800 flex items-center gap-2">
                         <ChefHat size={14} className="text-orange-400 flex-shrink-0" />
-                        #{p.numero_orden || p.id}
+                        #{p.numero_pedido || p.id}
                       </div>
                       <div className="text-xs text-gray-500 mt-0.5">
                         {p.items?.length || 0} ítems
@@ -342,7 +342,7 @@ export default function OrdenesPage() {
         {pedidoActivo && (
           <div className="space-y-4">
             <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-sm">
-              <div className="font-bold text-blue-800 text-lg">Orden #{pedidoActivo.numero_orden}</div>
+              <div className="font-bold text-blue-800 text-lg">Orden #{pedidoActivo.numero_pedido}</div>
               <div className="text-blue-600 text-xs mt-1">Mesa: {pedidoActivo.mesa || '—'}</div>
               <div className="text-gray-700 mt-2 text-sm">
                 <span className="font-semibold">Items:</span> {pedidoActivo.items?.map(i => i.nombre).join(', ')}
@@ -372,7 +372,7 @@ export default function OrdenesPage() {
         {pedidoActivo && (
           <div className="space-y-4">
             <div className="bg-green-50 border border-green-100 p-4 rounded-xl text-sm">
-              <div className="font-bold text-green-800 text-lg">Orden #{pedidoActivo.numero_orden}</div>
+              <div className="font-bold text-green-800 text-lg">Orden #{pedidoActivo.numero_pedido}</div>
               <div className="text-green-600 text-xs mt-1">Mesa: {pedidoActivo.mesa || '—'}</div>
               <div className="text-gray-700 mt-2 text-sm">
                 <span className="font-semibold">Items:</span> {pedidoActivo.items?.map(i => i.nombre).join(', ')}
@@ -406,7 +406,7 @@ export default function OrdenesPage() {
                 <ChefHat size={20} className="text-orange-600" />
               </div>
               <div>
-                <div className="font-bold text-lg text-gray-900">Orden #{pedidoActivo.numero_orden}</div>
+                <div className="font-bold text-lg text-gray-900">Orden #{pedidoActivo.numero_pedido}</div>
                 <div className="text-gray-500 text-xs">Mesa: {pedidoActivo.mesa || '—'}</div>
               </div>
               <div className="ml-auto">

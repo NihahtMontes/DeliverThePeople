@@ -83,7 +83,7 @@ export default function ChatClientePage() {
   const getPedidoLabel = (pedidoId) => {
     const pedido = pedidos.find(p => p.id === pedidoId)
     if (!pedido) return 'Pedido desconocido'
-    return `#${pedido.numero_orden || pedido.id} — Mesa ${pedido.mesa || '—'} (${pedido.estado})`
+    return `#${pedido.numero_pedido || pedido.id} — ${pedido.nombre_cliente || '—'} (${pedido.estado})`
   }
 
   return (
@@ -113,7 +113,7 @@ export default function ChatClientePage() {
               <option value="">Chat general (todos los mensajes)</option>
               {pedidos.map(p => (
                 <option key={p.id} value={p.id}>
-                  #{p.numero_orden || p.id} — Mesa {p.mesa || '—'} — {p.estado} — Bs. {Number(p.total || 0).toFixed(2)}
+                  #{p.numero_pedido || p.id} — {p.nombre_cliente || '—'} — {p.estado} — Bs. {Number(p.total || 0).toFixed(2)}
                 </option>
               ))}
             </select>
@@ -163,11 +163,11 @@ export default function ChatClientePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="bg-gray-50 rounded-2xl rounded-tl-none px-4 py-3 border border-gray-100">
-                    {m.numero_orden && (
+                    {m.numero_pedido && (
                       <div className="flex items-center gap-1 mb-1">
                         <MessageSquare size={10} className="text-blue-400" />
                         <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">
-                          Pedido #{m.numero_orden}
+                          Pedido #{m.numero_pedido}
                         </span>
                       </div>
                     )}

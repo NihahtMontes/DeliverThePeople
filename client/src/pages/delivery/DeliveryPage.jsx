@@ -52,7 +52,7 @@ export default function DeliveryPage() {
   }
 
   const pedidosFiltrados = pedidos.filter(p => {
-    const texto = `${p.numero_orden} ${p.mesa} ${p.items?.map(i => i.nombre).join(' ')}`.toLowerCase()
+    const texto = `${p.numero_pedido} ${p.nombre_cliente} ${p.items?.map(i => i.nombre).join(' ')}`.toLowerCase()
     const coincideBusqueda = busqueda ? texto.includes(busqueda.toLowerCase()) : true
     const coincideEstado = filtroEstado ? p.estado === filtroEstado : true
     const esHistorial = p.estado === 'ENTREGADO' || p.estado === 'CANCELADO'
@@ -168,7 +168,7 @@ export default function DeliveryPage() {
                     <td className="p-4">
                       <div className="font-bold text-gray-800 flex items-center gap-2">
                         <Truck size={14} className="text-green-400 flex-shrink-0" />
-                        #{p.numero_orden || p.id}
+                        #{p.numero_pedido || p.id}
                       </div>
                       <div className="text-xs text-gray-500 mt-0.5">
                         {p.items?.length || 0} items

@@ -146,7 +146,7 @@ export default function ColaProduccionPage() {
     const esActivo = p.estado !== 'TERMINADO' && p.estado !== 'CANCELADO'
     if (!esActivo) return false
 
-    const texto = `${p.numero_orden} ${p.mesa} ${p.items?.map(i => i.nombre).join(' ')}`.toLowerCase()
+    const texto = `${p.numero_pedido} ${p.nombre_cliente} ${p.items?.map(i => i.nombre).join(' ')}`.toLowerCase()
     const coincideBusqueda = busqueda ? texto.includes(busqueda.toLowerCase()) : true
     const coincideEstado = filtroEstado ? p.estado === filtroEstado : true
     // Filtro por ingrediente: si el item tiene categoria que coincida
@@ -345,7 +345,7 @@ export default function ColaProduccionPage() {
                 {/* Header de tarjeta */}
                 <div className={`px-4 py-3 flex justify-between items-center ${cfg.cls}`}>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-lg">#{p.numero_orden}</span>
+                    <span className="font-mono font-bold text-lg">#{p.numero_pedido}</span>
                     <span className="text-xs font-bold opacity-90">{p.mesa ? `Mesa ${p.mesa}` : 'Para llevar'}</span>
                   </div>
                   <span className="text-xs font-bold uppercase tracking-wider opacity-90">{cfg.label}</span>

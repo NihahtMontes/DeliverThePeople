@@ -417,7 +417,7 @@ function CocinaIncidenciasPanel() {
               <option value="">Seleccionar pedido...</option>
               {pedidos.map(p => (
                 <option key={p.id} value={p.id}>
-                  #{p.numero_orden} — {p.mesa ? `Mesa ${p.mesa}` : 'Para llevar'} ({p.items?.map(i => i.nombre).join(', ')})
+                  #{p.numero_pedido} — {p.nombre_cliente ? p.nombre_cliente : 'Para llevar'} ({p.items?.map(i => i.nombre).join(', ')})
                 </option>
               ))}
             </select>

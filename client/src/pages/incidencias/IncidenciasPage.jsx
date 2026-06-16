@@ -6,6 +6,9 @@ import {
 import api from '../../services/api'
 import GlassModal from '../../components/ui/GlassModal'
 import { useToast } from '../../hooks/useToast'
+import { useAuth } from '../../hooks/useAuth'
+import { TabBar } from '../../components/rrhh/RocketUi'
+import RrhhIncidenciasPanel from './RrhhIncidenciasPanel'
 
 // ── Tipos de incidencia ──
 const TIPOS = [
@@ -61,7 +64,7 @@ const FORM_INICIAL = {
   prioridad: 'ALTA'
 }
 
-export default function IncidenciasPage() {
+function CocinaIncidenciasPanel() {
   const toast = useToast()
   const [incidencias, setIncidencias] = useState([])
   const [pedidos, setPedidos] = useState([])
@@ -561,6 +564,22 @@ export default function IncidenciasPage() {
         )}
       </GlassModal>
 
+    </div>
+  )
+}
+
+export default function IncidenciasPage() {
+  const { user } = useAuth()
+  const puedeVerCocina = ['admin', 'gerente', 'cocinero'].includes(user?.rol)
+  const [tab, setTab] = useState(puedeVerCocina ? 'cocina' : 'rrhh')
+  const tabs = puedeVerCocina
+    ? [{ value: 'cocina', label: 'Cocina / Pedidos' }, { value: 'rrhh', label: 'RRHH - Personal' }]
+    : [{ value: 'rrhh', label: 'RRHH - Personal' }]
+
+  return (
+    <div className="space-y-6">
+      <TabBar tabs={tabs} active={tab} onChange={setTab} />
+      {tab === 'cocina' ? <CocinaIncidenciasPanel /> : <RrhhIncidenciasPanel />}
     </div>
   )
 }

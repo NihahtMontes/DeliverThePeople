@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "npm run dev --prefix server",
-    "dev:client": "npm run dev --prefix client",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
     "install:all": "npm install && npm install --prefix server && npm install --prefix client",
     "seed": "npm run seed --prefix server"
   },

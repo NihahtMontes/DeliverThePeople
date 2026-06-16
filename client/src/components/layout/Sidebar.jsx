@@ -1,13 +1,34 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
 import {
     Home, ChefHat, Truck, Package, Wrench, CreditCard,
-    Users, Clock, ClipboardList, MapPin, AlertTriangle, Menu, ChevronLeft, ListOrdered
+    Users, Clock, ClipboardList, MapPin, AlertTriangle, Menu, ChevronLeft, ListOrdered, MessageCircle
 } from 'lucide-react'
+
+// Definir qué roles pueden ver cada item del menú
+const PERMISOS_MENU = {
+    'Dashboard': ['admin', 'gerente', 'cocinero', 'despachador', 'cajero', 'aseo', 'mantenimiento', 'tecnico'],
+    'Órdenes': ['admin', 'cocinero', 'gerente'],
+    'Cola Producción': ['admin', 'cocinero'],
+    'Delivery': ['admin', 'despachador', 'gerente'],
+    'Chat con Cliente': ['admin', 'despachador', 'gerente'],
+    'Inventario': ['admin', 'gerente'],
+    'Equipos': ['admin', 'gerente', 'mantenimiento'],
+    'Pagos': ['admin', 'cajero', 'despachador'],
+    'Empleados': ['admin', 'gerente'],
+    'Turnos y Asist.': ['admin', 'gerente'],
+    'Tareas': ['admin', 'gerente', 'cocinero', 'aseo', 'mantenimiento'],
+    'Áreas': ['admin', 'gerente', 'aseo'],
+    'Incidencias': ['admin', 'gerente', 'cocinero', 'aseo'],
+    'Mantenimiento': ['admin', 'gerente', 'mantenimiento']
+}
 
 export default function Sidebar() {
     const [isCollapsed, setIsCollapsed] = useState(false)
     const location = useLocation()
+    const { user } = useAuth()
+    const rol = user?.rol || ''
 
     const menuGroups = [
         { title: 'Principal', items: [{ name: 'Dashboard', path: '/', icon: Home }] },
@@ -17,6 +38,7 @@ export default function Sidebar() {
                 { name: 'Órdenes', path: '/ordenes', icon: ChefHat },
                 { name: 'Cola Producción', path: '/cola-produccion', icon: ListOrdered },
                 { name: 'Delivery', path: '/delivery', icon: Truck },
+                { name: 'Chat con Cliente', path: '/chat-cliente', icon: MessageCircle },
                 { name: 'Inventario', path: '/inventario', icon: Package },
                 { name: 'Equipos', path: '/equipos', icon: Wrench },
                 { name: 'Pagos', path: '/pagos', icon: CreditCard },
@@ -40,6 +62,15 @@ export default function Sidebar() {
         }
     ]
 
+    // Filtrar los items del menú basados en el rol del usuario
+    const menuGroupsFiltrados = menuGroups.map(group => ({
+        ...group,
+        items: group.items.filter(item => {
+            const rolesPermitidos = PERMISOS_MENU[item.name] || []
+            return rolesPermitidos.includes(rol)
+        })
+    })).filter(group => group.items.length > 0) // Solo mostrar grupos que tienen items
+
     return (
         <aside className={`bg-gray-900 border-r border-gray-800 text-white flex flex-col transition-all duration-300 z-20 shadow-2xl ${isCollapsed ? 'w-20' : 'w-64'}`}>
             <div className="h-16 shrink-0 flex items-center justify-between px-4 border-b border-gray-800">
@@ -49,7 +80,7 @@ export default function Sidebar() {
                 </button>
             </div>
             <div className="flex-1 overflow-y-auto py-4">
-                {menuGroups.map((group, index) => (
+                {menuGroupsFiltrados.map((group, index) => (
                     <div key={index} className="mb-6">
                         {!isCollapsed && <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{group.title}</p>}
                         <ul className="space-y-1">

@@ -11,7 +11,7 @@ async function login(req, res, next) {
     }
 
     const result = await pool.query(
-      'SELECT id, email, nombre, apellido, rol, sucursal_id, estado, password_hash FROM empleados WHERE email = $1',
+      'SELECT id, email, password_hash, nombre, apellido, rol, sucursal_id, estado FROM empleados WHERE email = $1',
       [email]
     );
 

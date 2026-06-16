@@ -9,8 +9,8 @@ async function getIncidencias(req, res, next) {
     const baseSql = `
       SELECT i.*,
              e.nombre AS reportado_por,
-             p.numero_orden AS pedido_numero,
-             p.mesa AS pedido_mesa
+             p.numero_pedido AS pedido_numero,
+             p.nombre_cliente AS pedido_cliente
       FROM incidencias i
       LEFT JOIN empleados e ON i.empleado_id = e.id
       LEFT JOIN pedidos p ON i.pedido_id = p.id
@@ -18,9 +18,12 @@ async function getIncidencias(req, res, next) {
 
     let result;
     if (rol === 'admin' || rol === 'administrador' || !sucursalId) {
-      result = await pool.query(baseSql + ` ORDER BY i.created_at DESC`);
+      result = await pool.query(baseSql + ` WHERE (i.tipo IS NULL OR i.tipo NOT LIKE 'RRHH_%') ORDER BY i.created_at DESC`);
     } else {
-      result = await pool.query(baseSql + ` WHERE i.sucursal_id = $1 ORDER BY i.created_at DESC`, [sucursalId]);
+      result = await pool.query(
+        baseSql + ` WHERE i.sucursal_id = $1 AND (i.tipo IS NULL OR i.tipo NOT LIKE 'RRHH_%') ORDER BY i.created_at DESC`,
+        [sucursalId]
+      );
     }
 
     res.json({ incidencias: result.rows });

@@ -9,12 +9,10 @@ async function getMensajes(req, res, next) {
 
     const baseSql = `
       SELECT m.*,
-             p.numero_pedido,
-             p.nombre_cliente,
-             e.nombre AS enviado_por_nombre
+             p.numero_orden,
+             p.mesa
       FROM mensajes_cliente m
       LEFT JOIN pedidos p ON m.pedido_id = p.id
-      LEFT JOIN empleados e ON m.enviado_por = e.id
     `;
 
     const conditions = [];
@@ -27,7 +25,7 @@ async function getMensajes(req, res, next) {
     }
 
     if (!(rol === 'admin' || rol === 'administrador' || !sucursalId)) {
-      conditions.push(`p.sucursal_id = $${++paramIndex}`);
+      conditions.push(`m.sucursal_id = $${++paramIndex}`);
       params.push(sucursalId);
     }
 
@@ -35,7 +33,7 @@ async function getMensajes(req, res, next) {
     if (conditions.length > 0) {
       query += ` WHERE ${conditions.join(' AND ')}`;
     }
-    query += ` ORDER BY m.fecha DESC LIMIT 200`;
+    query += ` ORDER BY m.created_at DESC LIMIT 200`;
 
     const result = await pool.query(query, params);
     res.json({ mensajes: result.rows });
@@ -47,7 +45,7 @@ async function getMensajes(req, res, next) {
 // ── POST: Enviar mensaje a cliente (CU51) ──
 async function enviarMensaje(req, res, next) {
   try {
-    const enviadoPor = req.user.id;
+    const sucursalId = req.user.sucursal_id;
     const { mensaje, pedido_id } = req.body;
 
     if (!mensaje || mensaje.trim().length === 0) {
@@ -55,9 +53,9 @@ async function enviarMensaje(req, res, next) {
     }
 
     const result = await pool.query(
-      `INSERT INTO mensajes_cliente (pedido_id, mensaje, direccion, enviado_por, fecha)
-       VALUES ($1, $2, 'hacia_cliente', $3, now()) RETURNING *`,
-      [pedido_id || null, mensaje.trim(), enviadoPor]
+      `INSERT INTO mensajes_cliente (sucursal_id, pedido_id, mensaje, created_at)
+       VALUES ($1, $2, $3, now()) RETURNING *`,
+      [sucursalId, pedido_id || null, mensaje.trim()]
     );
 
     res.status(201).json({ mensaje: result.rows[0] });

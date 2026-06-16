@@ -2,7 +2,7 @@ const { pool } = require('../config/db');
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SELECT_AREAS = `
-  SELECT a.id, a.sucursal_id, a.nombre,
+  SELECT a.id, a.sucursal_id, a.nombre, a.descripcion, a.created_at,
          s.nombre AS sucursal_nombre,
          COUNT(e.id)::int AS empleados_sucursal_count
   FROM areas a

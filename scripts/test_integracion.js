@@ -55,12 +55,12 @@ async function testIntegration() {
     console.log('');
 
     // 2. AUTH (LOGIN)
-    console.log('2️⃣  AUTENTICACIÓN');
+    console.log('2️⃣  AUTENTICACIÓN (contra123)');
     const login = await makeRequest('POST', '/api/auth/login', {
-      email: 'admin@deliver.com',
-      password: 'password123'
+      email: 'admin@dtp.com',
+      password: 'contra123'
     });
-    check('Login admin', login.status, 200);
+    check('Login admin@dtp.com', login.status, 200);
     if (login.status === 200) {
       token = login.data.token;
       check('Token recibido', !!token, true);
@@ -132,7 +132,7 @@ async function testIntegration() {
       console.log('');
       console.log('✅ Todos los módulos están integrados:');
       console.log('   • Nihaht (Cocina): Pedidos, Cola, Incidencias');
-      console.log('   • Sandro (Operaciones): Equipos, Inventario, Mantenimiento');
+      console.log('   • Sandro (Operaciones): Equipos, Inventario, Mantenimientos');
       console.log('   • Danilo (Delivery): Pagos, Mensajes');
       console.log('   • Rocket (RRHH): Empleados, Horarios, Tareas, Áreas, Incidencias');
     } else {
